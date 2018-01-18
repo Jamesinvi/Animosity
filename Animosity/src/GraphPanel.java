@@ -1,0 +1,89 @@
+import java.awt.*;
+import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Timer;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.DatasetChangeListener;
+import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+
+public class GraphPanel extends JPanel{
+	int step=0;
+	AnimosityFrame frm;
+	
+	//list of creatures alive
+	ArrayList<Creature>creaturelist;
+	//Creating Charts
+	JFreeChart XYChart;
+	JFreeChart areaChart;
+	//Creating Series And Collections
+	XYSeries xyPopulationToT;
+	XYSeries xyForce;
+	XYSeries xySpeciesOne;
+	XYSeries xySpeciesTwo;
+	XYSeriesCollection xyDataset;
+	XYSeriesCollection xyAreaDataset;
+
+	//Constructor
+	public GraphPanel(AnimosityFrame f,FlowLayout flowLayout){
+		this.frm=f;
+		XYChart=ChartFactory.createXYLineChart("Title", "Time", "Population",tempDataset());
+		areaChart=ChartFactory.createXYAreaChart("Population", "Time", "Value", createXYAreaDataset()
+												,PlotOrientation.VERTICAL,true,true,false);
+	  	ChartPanel XYChartPanel=new ChartPanel(XYChart);
+		ChartPanel areaChartPanel=new ChartPanel(areaChart);
+		this.setLayout(flowLayout);
+		this.setBackground(Color.LIGHT_GRAY);
+		this.add(XYChartPanel);
+		this.add(areaChartPanel);
+		XYPlot plot1=areaChart.getXYPlot();
+		plot1.setForegroundAlpha(0.5f);
+	}
+
+	//CREATE EMPTY XYAreaDataset
+	private XYSeriesCollection createXYAreaDataset() {
+		xySpeciesOne= new XYSeries("Species 1");
+		xySpeciesTwo= new XYSeries("Species 2");
+		xyAreaDataset=new XYSeriesCollection(xySpeciesOne);
+		xyAreaDataset.addSeries(xySpeciesTwo);
+		return xyAreaDataset;
+	}
+	//CREATE EMPTY XYDataset
+	private XYDataset tempDataset(){
+		xyPopulationToT=new XYSeries("TotalPop");
+		xyForce=new XYSeries("Force");
+		xyDataset=new XYSeriesCollection(xyPopulationToT);
+		xyDataset.addSeries(xyForce);
+		return xyDataset;
+	}
+	//UPDATE METHODS CALLED BY THE SIMULATION TO ADD VALUES TO CHARTS
+	public void updateXYDataset(float value){
+		step++;
+		xyPopulationToT.add(step, value);
+	}
+	public void updateXYAreasDataset(float value1,float value2){
+		xySpeciesOne.add(step,value1);
+		xySpeciesTwo.add(step,value2);
+	}
+
+}

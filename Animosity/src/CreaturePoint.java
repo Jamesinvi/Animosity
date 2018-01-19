@@ -2,23 +2,7 @@ import java.util.ArrayList;
 
 public class CreaturePoint extends Creature {
 	
-	Simulation world;
-	
-	//CREATURE PARAMETERS
-	float maxforce;
-	float maxspeed;	
-	float distance;
-	
-	//POSITION AND SPEED OF THE CREATURE
-	Vector location;
-	Vector velocity;
-	Vector acceleration;
-	
-	//CREATURE RADIUS
-	int radius;
-	
-	
-	public CreaturePoint(Simulation world,float posX, float posY, int radius){
+	CreaturePoint(Simulation world,float posX, float posY, int radius){
 		this.world=world;
 		this.radius=radius;
 		this.location=new Vector(posX,posY);
@@ -26,21 +10,31 @@ public class CreaturePoint extends Creature {
 		this.acceleration=new Vector(0,0);
 		this.maxforce=0.08f;
 		this.maxspeed=3;
-		distance=0;
 		this.lifetime=1000;
-		this.type="POINT";
+		this.reproductionDelta=180;
+		this.adulthood=800;
+		this.health=190;
 	}
 
 	public void move(){
+		if(lifetime<adulthood && reproductionDelta<=0) {reproduce();}
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
 		acceleration.mult(0);
 	}
+	private void reproduce() {
+		int rng=Utilities.RNGLocX();
+		if(rng>90) {
+			world.frm.generateCreaturePoint((int)this.getLocationX(),(int)this.getLocationY());
+			reproductionDelta=100;
+		}
+		
+	}
+
 	public Vector seek(Vector target){
 		Vector desired=Vector.sub(target,location);
 		distance=desired.mag();
-		
 		if(distance<100){
 			float m=map(distance,0,100,0,maxspeed);
 			desired.setMag(m);
@@ -53,20 +47,22 @@ public class CreaturePoint extends Creature {
 		return steering;
 	}
 	Vector separate(ArrayList<Creature>creatures){
-		float desiredSep=radius*2;
+		float desiredSep=radius;
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close
 		for (Creature other:creatures){
-			float dist=Vector.dist(location,other.getLocation());
-			// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-			if((dist>0)&&(dist<desiredSep)){
-				// Calculate vector pointing away from neighbor
-				Vector diff=Vector.sub(location, other.getLocation());
-				diff.normalize();
-				diff.div(dist);			// Weight by distance
-				sum.add(diff);
-				count++;				//keep track of the number of creatures
+			if(other.getClass()==CreaturePoint.class) {
+				float dist=Vector.dist(location,other.getLocation());
+				// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+				if((dist>0)&&(dist<desiredSep)){
+					// Calculate vector pointing away from neighbor
+					Vector diff=Vector.sub(location, other.getLocation());
+					diff.normalize();
+					diff.div(dist);			// Weight by distance
+					sum.add(diff);
+					count++;				//keep track of the number of creatures
+				}
 			}
 		}
 		// Average -- divide by how many
@@ -83,11 +79,36 @@ public class CreaturePoint extends Creature {
 	}
 	public void applyBehaviours(ArrayList<Creature>creatures){
 		Vector separationForce=separate(creatures);
-		Vector seekForce=seek(Simulation.pointToVector(world.mousePoint));
+		//Vector seekForce=seek(Simulation.pointToPoint(world.mousePoint));
+		Vector seekForce=seek(eat(world.plantlist));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
 		applyForce(separationForce);
 		applyForce(seekForce);
+	}
+	Vector eat(ArrayList<Creature>list) {
+		Vector eatingDist=new Vector(15,15);
+		Vector res=new Vector(0,0);
+		double max= Double.POSITIVE_INFINITY;
+		Creature closest=null;
+		for (int i=0;i<list.size();i++) {
+			float dist=Vector.dist(this.location, list.get(i).location);
+			if (dist<max) {
+				max=dist;
+				closest=list.get(i);
+			}
+		}
+		try {
+			if (Vector.dist(this.location, closest.location)<closest.radius) {
+				list.remove(closest);
+				world.creaturelist.remove(closest);
+				health+=150;
+			}
+			res=closest.location;
+		}catch (NullPointerException e) {
+			System.out.println("NO PLANTS");
+		}
+		return res;
 	}
 	public int getRadius() {
 		return radius;
@@ -155,13 +176,13 @@ public class CreaturePoint extends Creature {
 	}
 
 	@Override
-	public int getWidth() {
+	int getHeight() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int getHeight() {
+	int getWidth() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

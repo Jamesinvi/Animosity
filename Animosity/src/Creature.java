@@ -1,15 +1,20 @@
 import java.util.ArrayList;
 
 public abstract class Creature {
-
-	String type;
+	
+	long ID=0;
 	Simulation world;
 	
 	//CREATURE PARAMETERS
 	float maxforce;
 	float maxspeed;
 	float distance;
+	int width;
+	int height;
 	int lifetime;
+	int adulthood;
+	int reproductionDelta;
+	int health;
 	
 	//Position and Speed of the ball
 	Vector location;
@@ -19,17 +24,42 @@ public abstract class Creature {
 	//CREATURE RADIUS
 	int radius;
 	
-	static float map(float value, float start1, float stop1, float start2, float stop2){
-		//value:stop1-start1=x:stop2-start1
-		float t1=stop1-start1;
-		float t2=stop2-start2;
-		float res=value*(t2/t1);
-		//System.out.println("Value: "+value+" Start1: "+start1+" Stop1: "+stop1+" Start2: "+start1+" Stop2: "+stop2);
-		//System.out.println("t1: "+t1+" t2: "+t2+"res: "+res);
-		return res;
-	}
 	
+	abstract void move();
+	abstract void applyBehaviours(ArrayList<Creature> a);
+	abstract int getHeight();
+	abstract int getWidth();
+
+
 	//GETTERS AND SETTERS + TOSTRING METHODS
+	public int getHealth() {
+		return health;
+	}
+	public void setHealth(int health) {
+		this.health=health;
+	}
+	public int getRadius() {
+		return radius;
+	}
+	public void setRadius(int radius) {
+		this.radius = radius;
+	}
+	public int getAdulthood() {
+		return adulthood;
+	}
+
+	public void setAdulthood(int adulthood) {
+		this.adulthood = adulthood;
+	}
+
+	public int getReproductionDelta() {
+		return reproductionDelta;
+	}
+
+	public void setReproductionDelta(int reproductionDelta) {
+		this.reproductionDelta = reproductionDelta;
+	}
+
 	public int getLifetime() {
 		return lifetime;
 	}
@@ -37,20 +67,6 @@ public abstract class Creature {
 	public void setLifetime(int lifetime) {
 		this.lifetime = lifetime;
 	}
-
-	abstract public void move();
-	abstract public Vector seek(Vector target);
-	abstract Vector separate(ArrayList<Creature>creatures);
-	abstract public void applyBehaviours(ArrayList<Creature>creatures);
-	abstract public int getWidth();
-	abstract public int getHeight();
-	public int getRadius() {
-		return radius;
-	}
-	public void setRadius(int radius) {
-		this.radius = radius;
-	}
-
 	public Vector getLocation() {
 		return location;
 	}
@@ -69,6 +85,7 @@ public abstract class Creature {
 	public float getLocationY(){
 		return location.getY();
 	}
+
 	public void applyForce(Vector f){
 		acceleration.add(f);
 	}

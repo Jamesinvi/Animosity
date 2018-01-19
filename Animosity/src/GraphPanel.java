@@ -31,8 +31,6 @@ public class GraphPanel extends JPanel{
 	int step=0;
 	AnimosityFrame frm;
 	
-	//list of creatures alive
-	ArrayList<Creature>creaturelist;
 	//Creating Charts
 	JFreeChart XYChart;
 	JFreeChart areaChart;
@@ -43,11 +41,12 @@ public class GraphPanel extends JPanel{
 	XYSeries xySpeciesTwo;
 	XYSeriesCollection xyDataset;
 	XYSeriesCollection xyAreaDataset;
+	XYSeries xySpeciesThree;
 
 	//Constructor
 	public GraphPanel(AnimosityFrame f,FlowLayout flowLayout){
 		this.frm=f;
-		XYChart=ChartFactory.createXYLineChart("Title", "Time", "Population",tempDataset());
+		XYChart=ChartFactory.createXYLineChart("TotalPopulation", "Time", "Population",tempDataset());
 		areaChart=ChartFactory.createXYAreaChart("Population", "Time", "Value", createXYAreaDataset()
 												,PlotOrientation.VERTICAL,true,true,false);
 	  	ChartPanel XYChartPanel=new ChartPanel(XYChart);
@@ -64,8 +63,10 @@ public class GraphPanel extends JPanel{
 	private XYSeriesCollection createXYAreaDataset() {
 		xySpeciesOne= new XYSeries("Species 1");
 		xySpeciesTwo= new XYSeries("Species 2");
+		xySpeciesThree=new XYSeries("Species 3");
 		xyAreaDataset=new XYSeriesCollection(xySpeciesOne);
 		xyAreaDataset.addSeries(xySpeciesTwo);
+		xyAreaDataset.addSeries(xySpeciesThree);
 		return xyAreaDataset;
 	}
 	//CREATE EMPTY XYDataset
@@ -81,9 +82,10 @@ public class GraphPanel extends JPanel{
 		step++;
 		xyPopulationToT.add(step, value);
 	}
-	public void updateXYAreasDataset(float value1,float value2){
+	public void updateXYAreasDataset(float value1,float value2,float value3){
 		xySpeciesOne.add(step,value1);
 		xySpeciesTwo.add(step,value2);
+		xySpeciesThree.add(step,value3);
 	}
 
 }

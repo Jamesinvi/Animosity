@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 
@@ -15,14 +16,15 @@ public class Simulation extends JPanel implements Runnable {
 	//Frame  setup
 	AnimosityFrame frm;
 	Point mousePoint;
-	public final int WIDTH=1840;
-	public final int HEIGHT=800;
+	public final static int WIDTH=1840;
+	public final static int HEIGHT=500;
 	//Runtime checks and counters
 	public boolean running=false;
 	public int tickCount=0;
 	public int delta=0;
-	//Creature arrayList
+	//Creature and Plant arrayList
 	ArrayList<Creature>creaturelist=new ArrayList<Creature>();
+	ArrayList<Creature>plantlist=new ArrayList<Creature>();
 
 	
 	//CONSTRUCTOR
@@ -38,13 +40,19 @@ public class Simulation extends JPanel implements Runnable {
 	public synchronized void start(){
 		new Thread(this).start();
 		running=true;
+		initSetup();
 	}
 	public synchronized void stop(){
 		running=false;
 	}
 	
 	/////////////////////////////////////////////
-	
+	public void initSetup() {
+		frm.generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
+		frm.generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
+		frm.generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
+		updateLists();
+	}
 	public void run() {
 		while (running){
 			tick();
@@ -58,18 +66,24 @@ public class Simulation extends JPanel implements Runnable {
 	
 	//TICK---MAIN LOGIC OF THE SIMULATION
 	private void tick() {
-		if (frm.creatures.size()>creaturelist.size()){
-			creaturelist.add(frm.creatures.get(frm.creatures.size()-1));
-		}
+		updateLists();
 		if (creaturelist.size()>0){
 			for (int i=0;i<creaturelist.size();i++){
 				Creature creatureI=creaturelist.get(i);
 				//Creature Behaviours
 				mousePoint=MouseInfo.getPointerInfo().getLocation();
 				creatureI.move();
+				updateLists();
 				creatureI.applyBehaviours(creaturelist);
+				updateLists();
 				if(creatureI.getLifetime()>0){
 					creatureI.setLifetime(creatureI.getLifetime()-1);
+					creatureI.setReproductionDelta(creatureI.getReproductionDelta()-1);
+					if(creatureI.health>0) {
+						creatureI.setHealth(creatureI.getHealth()-1);
+					}else {
+						creaturelist.remove(creatureI);
+					}
 					
 				}
 				else{
@@ -81,17 +95,19 @@ public class Simulation extends JPanel implements Runnable {
 		if (delta>100){
 			int creaturePointCount=0;
 			int creatureTriangleCount=0;
+			int creaturePlantCount=0;
 			//Count Creatures and types
 			for (int i=0;i<creaturelist.size();i++){
 				if (creaturelist.get(i).getClass()==CreaturePoint.class){
 					creaturePointCount++;
 				}else if(creaturelist.get(i).getClass()==CreatureTriangle.class){
 					creatureTriangleCount++;
-				}
+				}else if(creaturelist.get(i).getClass()==Plant_1.class)
+					creaturePlantCount++;
 			}
 			//Send data to charts and console
 			frm.northPanel.updateXYDataset(creaturelist.size());
-			frm.northPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount);
+			frm.northPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount,creaturePlantCount);
 			delta=0;
 		}
 		frm.creatures=creaturelist;
@@ -107,7 +123,7 @@ public class Simulation extends JPanel implements Runnable {
 		g2.setRenderingHints(rh);
 		for (int i=0;i<creaturelist.size();i++){
 			drawAppropriateShape(g2,creaturelist.get(i));
-			drawLineToMouse(g2, i);
+			//drawLineToMouse(g2, i);
 			g2.setColor(Color.DARK_GRAY);
 		}
 	}
@@ -132,23 +148,55 @@ public class Simulation extends JPanel implements Runnable {
 			int triangleY=(int)(creature.getLocationY())+creature.getHeight()/2;
 			Vector trianglePos=new Vector(triangleX,triangleY);
 			triangle.drawMe(g2, trianglePos);
-			//g2.fill(triangle);
+		}
+		else if(creature.getClass()==Plant_1.class){
+			g2.setColor(Color.GREEN);
+			int rectX=(int)(creature.getLocationX())-creature.getWidth()/2;
+			int rectY=(int)(creature.getLocationY())-creature.getHeight()/2;
+			Rectangle2D rect=new Rectangle2D.Float(rectX,rectY,creature.getWidth(),creature.getHeight()); 
+			g2.fill(rect);
 		}
 	}
     
-	
+	void updateLists(){
+		for (int i=0;i<frm.creatures.size();i++) {
+			try {
+				if (frm.creatures.get(i)!=creaturelist.get(i)){
+					creaturelist.add(frm.creatures.get(i));
+				}
+			}catch (Exception e) {
+				creaturelist.add(i, frm.creatures.get(i));;
+				}
+			try {
+				if (frm.creatures.get(i).getClass()==Plant_1.class && plantlist.get(i)!=plantlist.get(i)) {
+					plantlist.add(frm.creatures.get(i));
+				}
+			}catch (Exception e) {
+				plantlist.add(frm.creatures.get(i));
+			}
+		}
+	}
 	//OTHER STATIC METHODS
-	static Vector pointToVector(Point p){
+	static Vector pointToPoint(Point p){
     	Vector res=new Vector(p.x,p.y);
     	return res;
     }
-    static void printLists(ArrayList<Creature> a, ArrayList<Creature> b){
+	static Point vectToPoint(Vector v) {
+		Point res=new Point((int)v.getX(),(int)v.getY());
+		return res;
+	}
+
+    static void printLists(ArrayList<Creature> a, ArrayList<Creature> b, ArrayList<Creature> c){
 		System.out.print(1+": ");
 		for (Creature creature: a){
 			creature.debugString();
 		}
 		System.out.print("\n"+2+": ");
 		for (Creature creature: b){
+			creature.debugString();
+		}
+		System.out.print("\n"+3+": ");
+		for (Creature creature: c){
 			creature.debugString();
 		}
 		System.out.println(" ");

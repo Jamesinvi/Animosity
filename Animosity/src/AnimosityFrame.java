@@ -44,9 +44,18 @@ public class AnimosityFrame extends JFrame {
 		this.B_resume.addActionListener(listener);
 		this.B_resume.setActionCommand("RESUME");
 		this.B_stop.setEnabled(false);
-		this.B_resume.setEnabled(false);
+		this.B_resume.setEnabled(true);
 		this.add(mainPanel);
 		this.setVisible(true);
-		simulation.start();
+	}
+	//CREATURE GENERATOR METHODS
+	void generateCreaturePoint(int x,int y){
+		creatures.add(new CreaturePoint(simulation,x,y,20));
+	}
+	void generateCreatureTriangle(int x,int y){
+		creatures.add(new CreatureTriangle(simulation,x,y,20));
+	}
+	void generatePlant_1(int x,int y){
+		creatures.add(new Plant_1(simulation,x,y,30));
 	}
 }

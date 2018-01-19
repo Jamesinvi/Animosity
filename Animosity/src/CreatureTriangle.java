@@ -1,36 +1,23 @@
+import java.awt.Point;
 import java.util.ArrayList;
 
 public class CreatureTriangle extends Creature{
-	Simulation world;
+
 	
-	float maxforce;
-	float maxspeed;	
-	float distance;
-	
-	//POISTION AND SPEED OF THE CREATURE
-	Vector location;
-	Vector velocity;
-	Vector acceleration;
-	
-	//CREATURE DIMENSIONS
-	int width;
-	int height;
-	int radius;
-	
-	
-	public CreatureTriangle(Simulation world,float posX, float posY, int radius){
+	CreatureTriangle(Simulation world,float posX, float posY, int radius){
 		this.world=world;
 		this.width=15;
 		this.height=15;
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
-		this.maxforce=0.03f;
+		this.maxforce=0.08f;
 		this.maxspeed=1.9f;
 		this.radius=radius;
-		distance=0;
 		this.lifetime=1000;
-		this.type="TRIANGLE";
+		this.reproductionDelta=120;
+		this.adulthood=600;
+		this.health=100;
 	}
 
 	public void move(){
@@ -85,11 +72,24 @@ public class CreatureTriangle extends Creature{
 	}
 	public void applyBehaviours(ArrayList<Creature>creatures){
 		Vector separationForce=separate(creatures);
-		Vector seekForce=seek(Simulation.pointToVector(world.mousePoint));
+		Vector seekForce=selectTargetCreature(new Vector(0,0));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
 		applyForce(separationForce);
 		applyForce(seekForce);
+	}
+	public Vector selectTargetCreature(Vector v){
+		for(int i=0;i<world.creaturelist.size();i++) {
+			if (world.creaturelist.get(i).getClass().equals(CreaturePoint.class)) {
+				v=seek(Simulation.pointToPoint(Simulation.vectToPoint(world.creaturelist.get(i).getLocation())));
+				break;
+			}
+			else {
+				v=seek(Simulation.pointToPoint(world.mousePoint));
+			}	
+		}
+		return v;
+		
 	}
 	public int getRadius() {
 		return radius;

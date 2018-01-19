@@ -12,10 +12,10 @@ public class AnimosityListener implements ActionListener{
 		if (arg0.getActionCommand().equals("GENERATE")){
 			frm.B_resume.setEnabled(true);
 			frm.B_stop.setEnabled(true);
-			generateCreaturePoint();
+			frm.generateCreaturePoint(Utilities.RNGLocX(),Utilities.RNGLocY());
 		}
 		else if (arg0.getActionCommand().equals("GENERATEPREDATOR")){
-			generateCreatureTriangle();
+			frm.generateCreatureTriangle(Utilities.RNGLocX(),Utilities.RNGLocY());
 		}
 		else if (arg0.getActionCommand().equals("RESUME")){
 			frm.simulation.start();
@@ -31,12 +31,5 @@ public class AnimosityListener implements ActionListener{
 			frm.B_resume.setEnabled(true);
 			frm.B_stop.setEnabled(false);
 		}
-	}
-	//CREATURE GENERATOR METHODS
-	void generateCreaturePoint(){
-		frm.creatures.add(new CreaturePoint(frm.simulation,100,100,20));
-	}
-	void generateCreatureTriangle(){
-		frm.creatures.add(new CreatureTriangle(frm.simulation,100,100,59));
 	}
 }

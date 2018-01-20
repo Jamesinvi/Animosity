@@ -12,19 +12,28 @@ public class CreatureTriangle extends Creature{
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
 		this.maxforce=0.08f;
-		this.maxspeed=1.9f;
+		this.maxspeed=1.5f;
 		this.radius=radius;
-		this.lifetime=1000;
-		this.reproductionDelta=120;
-		this.adulthood=600;
-		this.health=100;
+		this.lifetime=600;
+		this.reproductionDelta=180;
+		this.adulthood=400;
+		this.health=250;
 	}
 
 	public void move(){
+		if(lifetime<adulthood && reproductionDelta<=0) {reproduce();}
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
 		acceleration.mult(0);
+	}
+	private void reproduce() {
+		int rng=Utilities.RNGLocX();
+		if(rng>1790) {
+			world.frm.generateCreatureTriangle((int)this.getLocationX(),(int)this.getLocationY());
+			reproductionDelta=100;
+		}
+		
 	}
 	public Vector seek(Vector target){
 		Vector desired=Vector.sub(target,location);
@@ -42,20 +51,22 @@ public class CreatureTriangle extends Creature{
 		return steering;
 	}
 	Vector separate(ArrayList<Creature>creatures){
-		float desiredSep=radius*0.4f;
+		float desiredSep=radius;
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close
 		for (Creature other:creatures){
-			float dist=Vector.dist(location,other.getLocation());
-			// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-			if((dist>0)&&(dist<desiredSep)){
-				// Calculate vector pointing away from neighbor
-				Vector diff=Vector.sub(location, other.getLocation());
-				diff.normalize();
-				diff.div(dist);			// Weight by distance
-				sum.add(diff);
-				count++;				//keep track of the number of creatures
+			if(other instanceof CreatureTriangle) {
+				float dist=Vector.dist(location,other.getLocation());
+				// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+				if((dist>0)&&(dist<desiredSep)){
+					// Calculate vector pointing away from neighbor
+					Vector diff=Vector.sub(location, other.getLocation());
+					diff.normalize();
+					diff.div(dist);			// Weight by distance
+					sum.add(diff);
+					count++;				//keep track of the number of creatures
+				}
 			}
 		}
 		// Average -- divide by how many
@@ -72,24 +83,36 @@ public class CreatureTriangle extends Creature{
 	}
 	public void applyBehaviours(ArrayList<Creature>creatures){
 		Vector separationForce=separate(creatures);
-		Vector seekForce=selectTargetCreature(new Vector(0,0));
+		Vector seekForce=seek(eat(world.creaturelist));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
 		applyForce(separationForce);
 		applyForce(seekForce);
 	}
-	public Vector selectTargetCreature(Vector v){
-		for(int i=0;i<world.creaturelist.size();i++) {
-			if (world.creaturelist.get(i).getClass().equals(CreaturePoint.class)) {
-				v=seek(Simulation.pointToPoint(Simulation.vectToPoint(world.creaturelist.get(i).getLocation())));
-				break;
+	Vector eat(ArrayList<Creature>list) {
+		Vector res=new Vector(0,0);
+		double max= Double.POSITIVE_INFINITY;
+		Creature closest=null;
+		for (int i=0;i<list.size();i++) {
+			if(list.get(i).getClass()==CreaturePoint.class) {
+				float dist=Vector.dist(this.location, list.get(i).location);
+					if (dist<max) {
+						max=dist;
+						closest=list.get(i);
+					}
 			}
-			else {
-				v=seek(Simulation.pointToPoint(world.mousePoint));
-			}	
 		}
-		return v;
-		
+		try {
+			if (Vector.dist(this.location, closest.location)<closest.radius && closest instanceof CreaturePoint) {
+				list.remove(closest);
+				world.creaturelist.remove(closest);
+				health+=150;
+			}
+			res=closest.location;
+		}catch (NullPointerException e) {
+			System.out.println("NO CREATURES");
+		}
+		return res;
 	}
 	public int getRadius() {
 		return radius;

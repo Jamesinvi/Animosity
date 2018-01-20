@@ -8,12 +8,12 @@ public class CreaturePoint extends Creature {
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
-		this.maxforce=0.08f;
+		this.maxforce=0.8f;
 		this.maxspeed=3;
 		this.lifetime=1000;
 		this.reproductionDelta=180;
 		this.adulthood=800;
-		this.health=190;
+		this.health=250;
 	}
 
 	public void move(){
@@ -25,7 +25,7 @@ public class CreaturePoint extends Creature {
 	}
 	private void reproduce() {
 		int rng=Utilities.RNGLocX();
-		if(rng>90) {
+		if(rng>1500) {
 			world.frm.generateCreaturePoint((int)this.getLocationX(),(int)this.getLocationY());
 			reproductionDelta=100;
 		}
@@ -87,7 +87,6 @@ public class CreaturePoint extends Creature {
 		applyForce(seekForce);
 	}
 	Vector eat(ArrayList<Creature>list) {
-		Vector eatingDist=new Vector(15,15);
 		Vector res=new Vector(0,0);
 		double max= Double.POSITIVE_INFINITY;
 		Creature closest=null;
@@ -99,7 +98,7 @@ public class CreaturePoint extends Creature {
 			}
 		}
 		try {
-			if (Vector.dist(this.location, closest.location)<closest.radius) {
+			if (Vector.dist(this.location, closest.location)<closest.radius && closest instanceof Plant_1) {
 				list.remove(closest);
 				world.creaturelist.remove(closest);
 				health+=150;

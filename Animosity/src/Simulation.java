@@ -48,9 +48,11 @@ public class Simulation extends JPanel implements Runnable {
 	
 	/////////////////////////////////////////////
 	public void initSetup() {
-		frm.generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
-		frm.generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
-		frm.generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
+		for(int i=0;i<5;i++) {
+			frm.generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
+			frm.generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
+			frm.generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
+		}
 		updateLists();
 	}
 	public void run() {

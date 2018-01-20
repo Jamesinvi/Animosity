@@ -56,15 +56,52 @@ public class Simulation extends JPanel implements Runnable {
 		updateLists();
 	}
 	public void run() {
-		while (running){
+		long fps=0;
+		long lastFpsTime=0;
+		long lastLoopTime = System.nanoTime();
+		final int TARGET_FPS = 60;
+		final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;   
+	   // keep looping round till the sim ends
+	   while (running){
+	      // work out how long its been since the last update, this
+	      // will be used to calculate how far the entities should
+	      // move this loop
+	      long now = System.nanoTime();
+	      long updateLength = now - lastLoopTime;
+	      lastLoopTime = now;
+	      //double delta = updateLength / ((double)OPTIMAL_TIME);
+	      // update the frame counter
+	      lastFpsTime += updateLength;
+	      fps++;
+	      // update our FPS counter if a second has passed since
+	      // we last recorded
+	      if (lastFpsTime >= 1000000000)
+	      {
+	         System.out.println("(FPS: "+fps+")");
+	         lastFpsTime = 0;
+	         fps = 0;
+	      }
+	      tick();
+	      repaint();
+	      // we want each frame to take 10 milliseconds, to do this
+	      // we've recorded when we started the frame. We add 10 milliseconds
+	      // to this and then factor in the current time to give 
+	      // us our final value to wait for
+	      // remember this is in ms, whereas our lastLoopTime etc. vars are in ns.
+	      try{Thread.sleep( (lastLoopTime-System.nanoTime() + OPTIMAL_TIME)/1000000 );}
+	      catch(Exception e) {System.out.println("BOH");}
+	   }
+	      
+	}
+
+		/*while (running){ //OLD RUN LOOP
 			tick();
 			try {
 				Thread.sleep(1000/60);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-	}
+		}*/
 	
 	//TICK---MAIN LOGIC OF THE SIMULATION
 	private void tick() {
@@ -104,18 +141,21 @@ public class Simulation extends JPanel implements Runnable {
 					creaturePointCount++;
 				}else if(creaturelist.get(i).getClass()==CreatureTriangle.class){
 					creatureTriangleCount++;
-				}else if(creaturelist.get(i).getClass()==Plant_1.class)
+				}else if(creaturelist.get(i).getClass()==Plant_1.class) {
 					creaturePlantCount++;
+				}
 			}
+			creaturePlantCount++;
 			//Send data to charts and console
 			frm.northPanel.updateXYDataset(creaturelist.size());
 			frm.northPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount,creaturePlantCount);
 			delta=0;
+			System.out.println("point: "+creaturePointCount+" triangle: "+creatureTriangleCount+" plant. "+creaturePlantCount);
 		}
 		frm.creatures=creaturelist;
 		tickCount++;;
 		delta++;
-		repaint();
+		//repaint();
 	}
 	//ALL PAINTING HAPPENS HERE 	
 	public void paintComponent(Graphics g){
@@ -126,7 +166,7 @@ public class Simulation extends JPanel implements Runnable {
 		for (int i=0;i<creaturelist.size();i++){
 			drawAppropriateShape(g2,creaturelist.get(i));
 			//drawLineToMouse(g2, i);
-			g2.setColor(Color.DARK_GRAY);
+			g2.setColor(Color.LIGHT_GRAY);
 		}
 	}
 	
@@ -140,12 +180,12 @@ public class Simulation extends JPanel implements Runnable {
 	}
 	void drawAppropriateShape(Graphics2D g2,Creature creature){
 		if (creature.getClass()==CreaturePoint.class){
-			g2.setColor(Color.black);
+			g2.setColor(Color.BLACK);
 			Ellipse2D circle=new Ellipse2D.Double(creature.getLocationX()-creature.getRadius()/2,creature.getLocationY()-creature.getRadius()/2,creature.getRadius(),creature.getRadius());
 			g2.fill(circle);
 		}
 		else if(creature.getClass()==CreatureTriangle.class){
-			TriangleShape triangle=new TriangleShape(creature.getWidth(),creature.getHeight(),Color.BLACK);
+			TriangleShape triangle=new TriangleShape(creature.getWidth(),creature.getHeight(),Color.BLUE);
 			int triangleX=(int)(creature.getLocationX())-creature.getWidth()/2;
 			int triangleY=(int)(creature.getLocationY())+creature.getHeight()/2;
 			Vector trianglePos=new Vector(triangleX,triangleY);

@@ -3,13 +3,13 @@ import java.util.ArrayList;
 public class Plant_1 extends Creature{
 	Plant_1(Simulation world,float posX, float posY, int radius){
 		this.world=world;
-		this.width=15;
-		this.height=15;
+		this.width=5;
+		this.height=5;
 		this.radius=radius;
 		this.location=new Vector(posX,posY);
 		this.radius=radius;
 		this.lifetime=10000;
-		this.reproductionDelta=40;
+		this.reproductionDelta=80;
 		this.adulthood=9999;
 		this.health=lifetime;
 	}

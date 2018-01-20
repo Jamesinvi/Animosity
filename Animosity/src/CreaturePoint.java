@@ -8,10 +8,10 @@ public class CreaturePoint extends Creature {
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
-		this.maxforce=0.8f;
+		this.maxforce=0.08f;
 		this.maxspeed=3;
 		this.lifetime=1000;
-		this.reproductionDelta=180;
+		this.reproductionDelta=150;
 		this.adulthood=800;
 		this.health=250;
 	}
@@ -35,8 +35,8 @@ public class CreaturePoint extends Creature {
 	public Vector seek(Vector target){
 		Vector desired=Vector.sub(target,location);
 		distance=desired.mag();
-		if(distance<100){
-			float m=map(distance,0,100,0,maxspeed);
+		if(distance<30){
+			float m=map(distance,0,30,0,maxspeed);
 			desired.setMag(m);
 		}
 		else{

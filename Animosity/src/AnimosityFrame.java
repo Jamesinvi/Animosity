@@ -50,12 +50,15 @@ public class AnimosityFrame extends JFrame {
 	}
 	//CREATURE GENERATOR METHODS
 	void generateCreaturePoint(int x,int y){
-		creatures.add(new CreaturePoint(simulation,x,y,20));
+		if (creatures.size()<500) 
+		creatures.add(new CreaturePoint(simulation,x,y,4));
 	}
 	void generateCreatureTriangle(int x,int y){
-		creatures.add(new CreatureTriangle(simulation,x,y,20));
+		if (creatures.size()<500) 
+		creatures.add(new CreatureTriangle(simulation,x,y,4));
 	}
 	void generatePlant_1(int x,int y){
-		creatures.add(new Plant_1(simulation,x,y,30));
+		if (creatures.size()<500) 
+		creatures.add(new Plant_1(simulation,x,y,5));
 	}
 }

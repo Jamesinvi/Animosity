@@ -1,4 +1,4 @@
-import java.awt.Point;
+
 import java.util.ArrayList;
 
 public class CreatureTriangle extends Creature{
@@ -6,17 +6,17 @@ public class CreatureTriangle extends Creature{
 	
 	CreatureTriangle(Simulation world,float posX, float posY, int radius){
 		this.world=world;
-		this.width=15;
-		this.height=15;
+		this.width=5;
+		this.height=5;
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
 		this.maxforce=0.08f;
-		this.maxspeed=1.5f;
+		this.maxspeed=2.4f;
 		this.radius=radius;
-		this.lifetime=600;
+		this.lifetime=880;
 		this.reproductionDelta=180;
-		this.adulthood=400;
+		this.adulthood=700;
 		this.health=250;
 	}
 
@@ -39,7 +39,7 @@ public class CreatureTriangle extends Creature{
 		Vector desired=Vector.sub(target,location);
 		distance=desired.mag();
 		
-		if(distance<100){
+		if(distance<10){
 			float m=map(distance,0,100,0,maxspeed);
 			desired.setMag(m);
 		}
@@ -51,7 +51,7 @@ public class CreatureTriangle extends Creature{
 		return steering;
 	}
 	Vector separate(ArrayList<Creature>creatures){
-		float desiredSep=radius;
+		float desiredSep=radius*2;
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close

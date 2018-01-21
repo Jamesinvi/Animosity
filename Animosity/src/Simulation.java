@@ -13,6 +13,10 @@ import javax.swing.JPanel;
 
 
 public class Simulation extends JPanel implements Runnable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 521807317949566808L;
 	//Frame  setup
 	AnimosityFrame frm;
 	Point mousePoint;
@@ -24,7 +28,7 @@ public class Simulation extends JPanel implements Runnable {
 	public int delta=0;
 	//Creature and Plant arrayList
 	ArrayList<Creature>creaturelist=new ArrayList<Creature>();
-	ArrayList<Creature>plantlist=new ArrayList<Creature>();
+	ArrayList<Creature>plantlist=new ArrayList<Creature>(creaturelist);;
 
 	
 	//CONSTRUCTOR
@@ -56,40 +60,30 @@ public class Simulation extends JPanel implements Runnable {
 		updateLists();
 	}
 	public void run() {
-		long fps=0;
-		long lastFpsTime=0;
-		long lastLoopTime = System.nanoTime();
-		final int TARGET_FPS = 60;
-		final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;   
-	   // keep looping round till the sim ends
-	   while (running){
-	      // work out how long its been since the last update, this
-	      // will be used to calculate how far the entities should
-	      // move this loop
-	      long now = System.nanoTime();
-	      long updateLength = now - lastLoopTime;
-	      lastLoopTime = now;
-	      //double delta = updateLength / ((double)OPTIMAL_TIME);
-	      // update the frame counter
-	      lastFpsTime += updateLength;
-	      fps++;
-	      // update our FPS counter if a second has passed since
-	      // we last recorded
-	      if (lastFpsTime >= 1000000000)
-	      {
-	         System.out.println("(FPS: "+fps+")");
-	         lastFpsTime = 0;
-	         fps = 0;
-	      }
-	      tick();
-	      repaint();
-	      // we want each frame to take 10 milliseconds, to do this
-	      // we've recorded when we started the frame. We add 10 milliseconds
-	      // to this and then factor in the current time to give 
-	      // us our final value to wait for
-	      // remember this is in ms, whereas our lastLoopTime etc. vars are in ns.
-	      try{Thread.sleep( (lastLoopTime-System.nanoTime() + OPTIMAL_TIME)/1000000 );}
-	      catch(Exception e) {System.out.println("BOH");}
+		long lastTime = System.nanoTime();
+	    final double ns = 1000000000.0 / 60.0;              // Here you can change the rate
+	    double delta = 0;
+	    long timer = System.currentTimeMillis();
+	    int frames = 0;
+	    int updates = 0;
+	    while (running) {
+	    	long now = System.nanoTime();
+	        delta += (now - lastTime) / ns;
+	        lastTime = now;
+	        while (delta >= 1) {
+	           tick();
+	           delta--;
+	           updates++;   
+	           						// Anything put inside this while loop will be executed 60 times per second
+	        }       
+	        repaint();				// By having the render() method outside of this while loop, it renders as many times it can
+	        frames++;
+	        if (System.currentTimeMillis() - timer > 1000) {
+	           timer += 1000;
+	           frm.setTitle(frm.name+ "--"+updates + " ups, " + frames + " fps");
+	           updates = 0;
+	           frames = 0;
+	        }
 	   }
 	      
 	}
@@ -109,12 +103,8 @@ public class Simulation extends JPanel implements Runnable {
 		if (creaturelist.size()>0){
 			for (int i=0;i<creaturelist.size();i++){
 				Creature creatureI=creaturelist.get(i);
-				//Creature Behaviours
-				mousePoint=MouseInfo.getPointerInfo().getLocation();
 				creatureI.move();
-				updateLists();
 				creatureI.applyBehaviours(creaturelist);
-				updateLists();
 				if(creatureI.getLifetime()>0){
 					creatureI.setLifetime(creatureI.getLifetime()-1);
 					creatureI.setReproductionDelta(creatureI.getReproductionDelta()-1);
@@ -150,12 +140,10 @@ public class Simulation extends JPanel implements Runnable {
 			frm.northPanel.updateXYDataset(creaturelist.size());
 			frm.northPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount,creaturePlantCount);
 			delta=0;
-			System.out.println("point: "+creaturePointCount+" triangle: "+creatureTriangleCount+" plant. "+creaturePlantCount);
 		}
-		frm.creatures=creaturelist;
+		creaturelist=frm.creatures;
 		tickCount++;;
 		delta++;
-		//repaint();
 	}
 	//ALL PAINTING HAPPENS HERE 	
 	public void paintComponent(Graphics g){
@@ -205,16 +193,17 @@ public class Simulation extends JPanel implements Runnable {
 			try {
 				if (frm.creatures.get(i)!=creaturelist.get(i)){
 					creaturelist.add(frm.creatures.get(i));
-				}
-			}catch (Exception e) {
-				creaturelist.add(i, frm.creatures.get(i));;
-				}
-			try {
-				if (frm.creatures.get(i).getClass()==Plant_1.class && plantlist.get(i)!=plantlist.get(i)) {
 					plantlist.add(frm.creatures.get(i));
 				}
 			}catch (Exception e) {
+				creaturelist.add(i, frm.creatures.get(i));;
 				plantlist.add(frm.creatures.get(i));
+			}
+		}
+		plantlist=new ArrayList<Creature>();
+		for (int i=0;i<creaturelist.size();i++) {
+			if(creaturelist.get(i).getClass()==Plant_1.class) {
+				plantlist.add(creaturelist.get(i));
 			}
 		}
 	}

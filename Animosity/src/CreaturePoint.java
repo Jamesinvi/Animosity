@@ -8,8 +8,8 @@ public class CreaturePoint extends Creature {
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
-		this.maxforce=0.08f;
-		this.maxspeed=3;
+		this.maxforce=0.1f;
+		this.maxspeed=1.9f;
 		this.lifetime=1000;
 		this.reproductionDelta=150;
 		this.adulthood=800;
@@ -17,7 +17,12 @@ public class CreaturePoint extends Creature {
 	}
 
 	public void move(){
-		if(lifetime<adulthood && reproductionDelta<=0) {reproduce();}
+		if(lifetime<adulthood && reproductionDelta<=0) {
+			if(world.frm.creatures.size()==500){
+				world.frm.makeSpace();
+			}
+			reproduce();
+			}
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -37,7 +42,7 @@ public class CreaturePoint extends Creature {
 		distance=desired.mag();
 		if(distance<30){
 			float m=map(distance,0,30,0,maxspeed);
-			desired.setMag(m);
+			desired.setMag(m+5);
 		}
 		else{
 			desired.setMag(maxspeed);
@@ -87,7 +92,7 @@ public class CreaturePoint extends Creature {
 		applyForce(seekForce);
 	}
 	Vector eat(ArrayList<Creature>list) {
-		Vector res=new Vector(0,0);
+		Vector res=new Vector(this.location.x,this.location.y);
 		double max= Double.POSITIVE_INFINITY;
 		Creature closest=null;
 		for (int i=0;i<list.size();i++) {
@@ -105,7 +110,6 @@ public class CreaturePoint extends Creature {
 			}
 			res=closest.location;
 		}catch (NullPointerException e) {
-			System.out.println("NO PLANTS");
 		}
 		return res;
 	}

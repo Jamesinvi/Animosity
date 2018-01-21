@@ -1,33 +1,21 @@
 import java.awt.*;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Timer;
-
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DatasetChangeEvent;
-import org.jfree.data.general.DatasetChangeListener;
-import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 
 public class GraphPanel extends JPanel{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8297203371989662047L;
 	int step=0;
 	AnimosityFrame frm;
 	

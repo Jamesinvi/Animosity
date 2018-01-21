@@ -12,16 +12,21 @@ public class CreatureTriangle extends Creature{
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
 		this.maxforce=0.08f;
-		this.maxspeed=2.4f;
+		this.maxspeed=1.7f;
 		this.radius=radius;
-		this.lifetime=880;
+		this.lifetime=800;
 		this.reproductionDelta=180;
-		this.adulthood=700;
+		this.adulthood=600;
 		this.health=250;
 	}
 
 	public void move(){
-		if(lifetime<adulthood && reproductionDelta<=0) {reproduce();}
+		if(lifetime<adulthood && reproductionDelta<=0) {
+			if(world.frm.creatures.size()==500){
+				world.frm.makeSpace();
+			}
+			reproduce();
+			}
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -55,7 +60,8 @@ public class CreatureTriangle extends Creature{
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close
-		for (Creature other:creatures){
+		for (int i=0;i<creatures.size();i++){
+			Creature other=creatures.get(i);
 			if(other instanceof CreatureTriangle) {
 				float dist=Vector.dist(location,other.getLocation());
 				// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
@@ -110,7 +116,6 @@ public class CreatureTriangle extends Creature{
 			}
 			res=closest.location;
 		}catch (NullPointerException e) {
-			System.out.println("NO CREATURES");
 		}
 		return res;
 	}

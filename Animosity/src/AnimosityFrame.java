@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 public class AnimosityFrame extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4091715683579074343L;
 	ArrayList<Creature>creatures=new ArrayList<Creature>();
-	static String name;
+	String name;
 	static double version=0.1;
 	Simulation simulation=new Simulation(this);
 	JPanel mainPanel=new JPanel(new BorderLayout());
@@ -18,6 +22,7 @@ public class AnimosityFrame extends JFrame {
 	JButton B_generate_predator=new JButton("Generate Predator");
 	JButton B_stop=new JButton("Stop");
 	JButton B_resume=new JButton("Start/Resume");
+	JButton B_savePNG=new JButton("Save Graphs as PNG");
 	
 	AnimosityListener listener=new AnimosityListener(this);
 	
@@ -31,6 +36,7 @@ public class AnimosityFrame extends JFrame {
 		southPanel.add(B_generate_predator);
 		southPanel.add(B_stop);
 		southPanel.add(B_resume);
+		southPanel.add(B_savePNG);
 		mainPanel.add(northPanel, BorderLayout.NORTH);
 		mainPanel.add(centerPanel, BorderLayout.CENTER);
 		mainPanel.add(southPanel, BorderLayout.SOUTH);
@@ -43,22 +49,31 @@ public class AnimosityFrame extends JFrame {
 		this.B_stop.setActionCommand("STOP");
 		this.B_resume.addActionListener(listener);
 		this.B_resume.setActionCommand("RESUME");
+		this.B_savePNG.addActionListener(listener);
+		this.B_savePNG.setActionCommand("SAVEGRAPHS");
 		this.B_stop.setEnabled(false);
+		this.B_generate_creature.setEnabled(false);
+		this.B_generate_predator.setEnabled(false);
 		this.B_resume.setEnabled(true);
 		this.add(mainPanel);
 		this.setVisible(true);
 	}
 	//CREATURE GENERATOR METHODS
 	void generateCreaturePoint(int x,int y){
-		if (creatures.size()<500) 
+		if (creatures.size()==1000) makeSpace();
 		creatures.add(new CreaturePoint(simulation,x,y,4));
 	}
 	void generateCreatureTriangle(int x,int y){
-		if (creatures.size()<500) 
+		if (creatures.size()==1000) makeSpace();
 		creatures.add(new CreatureTriangle(simulation,x,y,4));
 	}
 	void generatePlant_1(int x,int y){
-		if (creatures.size()<500) 
+		if (creatures.size()==1000) makeSpace();
 		creatures.add(new Plant_1(simulation,x,y,5));
+	}
+	void makeSpace() {
+		for (int i=0;i<200;i++) {
+			creatures.remove(creatures.get(creatures.size()-1));
+		}
 	}
 }

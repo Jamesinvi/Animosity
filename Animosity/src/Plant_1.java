@@ -20,9 +20,9 @@ public class Plant_1 extends Creature{
 	}
 	private void reproduce() {
 		int rng=Utilities.RNGLocX();
-		if(rng>90) {
+		if(rng>1700) {
 			world.frm.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
-			reproductionDelta=300;
+			reproductionDelta=160;
 		}
 		
 	}

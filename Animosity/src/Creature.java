@@ -4,7 +4,7 @@ public abstract class Creature {
 	
 	long ID=0;
 	Simulation world;
-	
+	Creature targetCreature;
 	//CREATURE PARAMETERS
 	float maxforce;
 	float maxspeed;
@@ -14,6 +14,7 @@ public abstract class Creature {
 	int lifetime;
 	int adulthood;
 	int reproductionDelta;
+	boolean reproductionBoolean;
 	int health;
 	
 	//Position and Speed of the ball

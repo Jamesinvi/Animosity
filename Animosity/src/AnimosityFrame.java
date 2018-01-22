@@ -68,11 +68,13 @@ public class AnimosityFrame extends JFrame {
 		creatures.add(new CreatureTriangle(simulation,x,y,4));
 	}
 	void generatePlant_1(int x,int y){
-		if (creatures.size()==1000) makeSpace();
+		if (creatures.size()==1000) {
+			makeSpace();
+		}
 		creatures.add(new Plant_1(simulation,x,y,5));
 	}
 	void makeSpace() {
-		for (int i=0;i<200;i++) {
+		for (int i=0;i<300;i++) {
 			creatures.remove(creatures.get(creatures.size()-1));
 		}
 	}

@@ -109,6 +109,7 @@ public class CreaturePoint extends Creature {
 				health+=150;
 			}
 			res=closest.location;
+			this.targetCreature=closest;
 		}catch (NullPointerException e) {
 		}
 		return res;

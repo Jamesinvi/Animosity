@@ -100,6 +100,7 @@ public class Simulation extends JPanel implements Runnable {
 	//TICK---MAIN LOGIC OF THE SIMULATION
 	private void tick() {
 		updateLists();
+		creaturelist=frm.creatures;
 		if (creaturelist.size()>0){
 			for (int i=0;i<creaturelist.size();i++){
 				Creature creatureI=creaturelist.get(i);
@@ -141,7 +142,6 @@ public class Simulation extends JPanel implements Runnable {
 			frm.northPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount,creaturePlantCount);
 			delta=0;
 		}
-		creaturelist=frm.creatures;
 		tickCount++;;
 		delta++;
 	}
@@ -153,18 +153,30 @@ public class Simulation extends JPanel implements Runnable {
 		g2.setRenderingHints(rh);
 		for (int i=0;i<creaturelist.size();i++){
 			drawAppropriateShape(g2,creaturelist.get(i));
-			//drawLineToMouse(g2, i);
+			drawLineToTarget(g2, i);
 			g2.setColor(Color.LIGHT_GRAY);
 		}
 	}
 	
 	//PAINTING HELPING METHODS
-	void drawLineToMouse(Graphics2D g2,int i){
-		g2.setColor(Color.white);
-		g2.draw(new Line2D.Float(creaturelist.get(i).getLocationX(),
-								 creaturelist.get(i).getLocationY(),
-								 MouseInfo.getPointerInfo().getLocation().x,
-								 MouseInfo.getPointerInfo().getLocation().y));
+	void drawLineToTarget(Graphics2D g2,int i){
+		try {
+			if (creaturelist.get(i) instanceof Plant_1) {
+				return;
+			}else if (creaturelist.get(i) instanceof CreaturePoint) {
+				Color white=new Color(1.0f,1.0f,1.0f,0.2f);
+				g2.setColor(white);
+			}else if (creaturelist.get(i) instanceof CreatureTriangle) {
+				Color red=new Color(1.0f,0f,0f,0.2f);
+				g2.setColor(red);
+			}
+				Creature target=creaturelist.get(i).targetCreature;
+				g2.draw(new Line2D.Float(creaturelist.get(i).getLocationX(),
+									 creaturelist.get(i).getLocationY(),
+									 target.getLocationX(),target.getLocationY()));
+			}catch (NullPointerException  | IndexOutOfBoundsException e) {
+			return;
+		}
 	}
 	void drawAppropriateShape(Graphics2D g2,Creature creature){
 		if (creature.getClass()==CreaturePoint.class){

@@ -12,6 +12,7 @@ public class Plant_1 extends Creature{
 		this.reproductionDelta=80;
 		this.adulthood=9999;
 		this.health=lifetime;
+		this.targetCreature=null;
 	}
 
 	@Override

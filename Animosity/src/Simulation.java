@@ -23,12 +23,14 @@ public class Simulation extends JPanel implements Runnable {
 	public final static int WIDTH=1840;
 	public final static int HEIGHT=500;
 	//Runtime checks and counters
+	public boolean debugging=false;
 	public boolean running=false;
 	public int tickCount=0;
 	public int delta=0;
 	//Creature and Plant arrayList
 	ArrayList<Creature>creaturelist=new ArrayList<Creature>();
-	ArrayList<Creature>plantlist=new ArrayList<Creature>(creaturelist);;
+	ArrayList<Creature>plantlist=new ArrayList<Creature>();
+	ArrayList<Creature>trianglelist=new ArrayList<Creature>();
 
 	
 	//CONSTRUCTOR
@@ -52,7 +54,7 @@ public class Simulation extends JPanel implements Runnable {
 	
 	/////////////////////////////////////////////
 	public void initSetup() {
-		for(int i=0;i<5;i++) {
+		for(int i=0;i<20;i++) {
 			frm.generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
 			frm.generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
 			frm.generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
@@ -74,10 +76,10 @@ public class Simulation extends JPanel implements Runnable {
 	           tick();
 	           delta--;
 	           updates++;   
-	           						// Anything put inside this while loop will be executed 60 times per second
+		       repaint();
+		       frames++;			// Anything put inside this while loop will be executed 60 times per second
 	        }       
-	        repaint();				// By having the render() method outside of this while loop, it renders as many times it can
-	        frames++;
+	        						// Anything put outside is executed as many times it can --add repaint() method here later
 	        if (System.currentTimeMillis() - timer > 1000) {
 	           timer += 1000;
 	           frm.setTitle(frm.name+ "--"+updates + " ups, " + frames + " fps");
@@ -87,15 +89,6 @@ public class Simulation extends JPanel implements Runnable {
 	   }
 	      
 	}
-
-		/*while (running){ //OLD RUN LOOP
-			tick();
-			try {
-				Thread.sleep(1000/60);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}*/
 	
 	//TICK---MAIN LOGIC OF THE SIMULATION
 	private void tick() {
@@ -105,20 +98,6 @@ public class Simulation extends JPanel implements Runnable {
 			for (int i=0;i<creaturelist.size();i++){
 				Creature creatureI=creaturelist.get(i);
 				creatureI.move();
-				creatureI.applyBehaviours(creaturelist);
-				if(creatureI.getLifetime()>0){
-					creatureI.setLifetime(creatureI.getLifetime()-1);
-					creatureI.setReproductionDelta(creatureI.getReproductionDelta()-1);
-					if(creatureI.health>0) {
-						creatureI.setHealth(creatureI.getHealth()-1);
-					}else {
-						creaturelist.remove(creatureI);
-					}
-					
-				}
-				else{
-					creaturelist.remove(creatureI);
-				}
 			}
 		}
 		//Only send data once in a while to avoid overloading the system
@@ -152,54 +131,11 @@ public class Simulation extends JPanel implements Runnable {
 		RenderingHints rh=new RenderingHints(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHints(rh);
 		for (int i=0;i<creaturelist.size();i++){
-			drawAppropriateShape(g2,creaturelist.get(i));
-			drawLineToTarget(g2, i);
+			creaturelist.get(i).display(g2);
 			g2.setColor(Color.LIGHT_GRAY);
 		}
 	}
-	
-	//PAINTING HELPING METHODS
-	void drawLineToTarget(Graphics2D g2,int i){
-		try {
-			if (creaturelist.get(i) instanceof Plant_1) {
-				return;
-			}else if (creaturelist.get(i) instanceof CreaturePoint) {
-				Color white=new Color(1.0f,1.0f,1.0f,0.2f);
-				g2.setColor(white);
-			}else if (creaturelist.get(i) instanceof CreatureTriangle) {
-				Color red=new Color(1.0f,0f,0f,0.2f);
-				g2.setColor(red);
-			}
-				Creature target=creaturelist.get(i).targetCreature;
-				g2.draw(new Line2D.Float(creaturelist.get(i).getLocationX(),
-									 creaturelist.get(i).getLocationY(),
-									 target.getLocationX(),target.getLocationY()));
-			}catch (NullPointerException  | IndexOutOfBoundsException e) {
-			return;
-		}
-	}
-	void drawAppropriateShape(Graphics2D g2,Creature creature){
-		if (creature.getClass()==CreaturePoint.class){
-			g2.setColor(Color.BLACK);
-			Ellipse2D circle=new Ellipse2D.Double(creature.getLocationX()-creature.getRadius()/2,creature.getLocationY()-creature.getRadius()/2,creature.getRadius(),creature.getRadius());
-			g2.fill(circle);
-		}
-		else if(creature.getClass()==CreatureTriangle.class){
-			TriangleShape triangle=new TriangleShape(creature.getWidth(),creature.getHeight(),Color.BLUE);
-			int triangleX=(int)(creature.getLocationX())-creature.getWidth()/2;
-			int triangleY=(int)(creature.getLocationY())+creature.getHeight()/2;
-			Vector trianglePos=new Vector(triangleX,triangleY);
-			triangle.drawMe(g2, trianglePos);
-		}
-		else if(creature.getClass()==Plant_1.class){
-			g2.setColor(Color.GREEN);
-			int rectX=(int)(creature.getLocationX())-creature.getWidth()/2;
-			int rectY=(int)(creature.getLocationY())-creature.getHeight()/2;
-			Rectangle2D rect=new Rectangle2D.Float(rectX,rectY,creature.getWidth(),creature.getHeight()); 
-			g2.fill(rect);
-		}
-	}
-    
+	    
 	void updateLists(){
 		for (int i=0;i<frm.creatures.size();i++) {
 			try {
@@ -213,9 +149,12 @@ public class Simulation extends JPanel implements Runnable {
 			}
 		}
 		plantlist=new ArrayList<Creature>();
+		trianglelist=new ArrayList<Creature>();
 		for (int i=0;i<creaturelist.size();i++) {
-			if(creaturelist.get(i).getClass()==Plant_1.class) {
+			if(creaturelist.get(i) instanceof Plant_1) {
 				plantlist.add(creaturelist.get(i));
+			}else if (creaturelist.get(i) instanceof CreatureTriangle) {
+				trianglelist.add(creaturelist.get(i));
 			}
 		}
 	}

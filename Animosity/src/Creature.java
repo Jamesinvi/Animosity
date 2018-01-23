@@ -1,3 +1,4 @@
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 public abstract class Creature {
@@ -16,6 +17,7 @@ public abstract class Creature {
 	int reproductionDelta;
 	boolean reproductionBoolean;
 	int health;
+	float perceptionRadius;
 	
 	//Position and Speed of the ball
 	Vector location;
@@ -28,10 +30,20 @@ public abstract class Creature {
 	
 	abstract void move();
 	abstract void applyBehaviours(ArrayList<Creature> a);
+	abstract void drawLineToTarget(Graphics2D g2);
+	abstract void display(Graphics2D g2);
 	abstract int getHeight();
 	abstract int getWidth();
 
-
+	public void update(){
+		if(this.lifetime>0 && this.health>0){
+			this.setLifetime(this.lifetime-1);
+			this.setReproductionDelta(this.reproductionDelta-1);
+			this.setHealth(this.health-1);
+		}else {
+			world.creaturelist.remove(this);
+		}
+	}
 	//GETTERS AND SETTERS + TOSTRING METHODS
 	public int getHealth() {
 		return health;

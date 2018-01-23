@@ -1,3 +1,7 @@
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
 public class CreaturePoint extends Creature {
@@ -14,15 +18,18 @@ public class CreaturePoint extends Creature {
 		this.reproductionDelta=150;
 		this.adulthood=800;
 		this.health=250;
+		this.perceptionRadius=500;
 	}
 
 	public void move(){
 		if(lifetime<adulthood && reproductionDelta<=0) {
-			if(world.frm.creatures.size()==500){
+			if(world.frm.creatures.size()>=500){
 				world.frm.makeSpace();
 			}
 			reproduce();
 			}
+		applyBehaviours(world.creaturelist);
+		update();
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -34,7 +41,6 @@ public class CreaturePoint extends Creature {
 			world.frm.generateCreaturePoint((int)this.getLocationX(),(int)this.getLocationY());
 			reproductionDelta=100;
 		}
-		
 	}
 
 	public Vector seek(Vector target){
@@ -56,13 +62,13 @@ public class CreaturePoint extends Creature {
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close
-		for (Creature other:creatures){
-			if(other.getClass()==CreaturePoint.class) {
-				float dist=Vector.dist(location,other.getLocation());
+		for (int i=creatures.size()-1;i>=0;i--){
+			if(creatures.get(i) instanceof CreaturePoint) {
+				float dist=Vector.dist(location,creatures.get(i).getLocation());
 				// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
 				if((dist>0)&&(dist<desiredSep)){
 					// Calculate vector pointing away from neighbor
-					Vector diff=Vector.sub(location, other.getLocation());
+					Vector diff=Vector.sub(location, creatures.get(i).getLocation());
 					diff.normalize();
 					diff.div(dist);			// Weight by distance
 					sum.add(diff);
@@ -84,7 +90,6 @@ public class CreaturePoint extends Creature {
 	}
 	public void applyBehaviours(ArrayList<Creature>creatures){
 		Vector separationForce=separate(creatures);
-		//Vector seekForce=seek(Simulation.pointToPoint(world.mousePoint));
 		Vector seekForce=seek(eat(world.plantlist));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
@@ -92,8 +97,8 @@ public class CreaturePoint extends Creature {
 		applyForce(seekForce);
 	}
 	Vector eat(ArrayList<Creature>list) {
-		Vector res=new Vector(this.location.x,this.location.y);
-		double max= Double.POSITIVE_INFINITY;
+		Vector res=new Vector(this.velocity);
+		double max= perceptionRadius;
 		Creature closest=null;
 		for (int i=0;i<list.size();i++) {
 			float dist=Vector.dist(this.location, list.get(i).location);
@@ -111,6 +116,7 @@ public class CreaturePoint extends Creature {
 			res=closest.location;
 			this.targetCreature=closest;
 		}catch (NullPointerException e) {
+			closest=null;
 		}
 		return res;
 	}
@@ -190,5 +196,30 @@ public class CreaturePoint extends Creature {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
+	@Override
+	void display(Graphics2D g2) {
+		g2.setColor(Color.BLACK);
+		Ellipse2D circle=new Ellipse2D.Double(this.location.x-this.radius/2,this.location.y-this.radius/2,this.radius,this.radius);
+		g2.fill(circle);
+		if(world.debugging) {
+			drawLineToTarget(g2);
+			Ellipse2D perception=new Ellipse2D.Double(this.location.x-this.perceptionRadius/2,this.location.y-this.perceptionRadius/2,this.perceptionRadius,this.perceptionRadius);
+			g2.draw(perception);
+		}
+	}
+
+	@Override
+	void drawLineToTarget(Graphics2D g2) {
+		try {
+			Color red=new Color(1.0f,1.0f,1.0f,0.2f);
+			g2.setColor(red);
+			Creature target=this.targetCreature;
+			g2.draw(new Line2D.Float(this.getLocationX(),
+									 this.getLocationY(),
+									 target.getLocationX(),target.getLocationY()));
+			}catch (NullPointerException  | IndexOutOfBoundsException e) {
+			return;
+		}
+	}
 }

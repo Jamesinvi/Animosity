@@ -24,6 +24,7 @@ public class AnimosityFrame extends JFrame {
 	JButton B_resume=new JButton("Start/Resume");
 	JButton B_savePNG=new JButton("Save Graphs as PNG");
 	
+	JCheckBox debugCheckBox=new JCheckBox("Debug visualization");
 	AnimosityListener listener=new AnimosityListener(this);
 	
 	
@@ -37,6 +38,7 @@ public class AnimosityFrame extends JFrame {
 		southPanel.add(B_stop);
 		southPanel.add(B_resume);
 		southPanel.add(B_savePNG);
+		southPanel.add(debugCheckBox);
 		mainPanel.add(northPanel, BorderLayout.NORTH);
 		mainPanel.add(centerPanel, BorderLayout.CENTER);
 		mainPanel.add(southPanel, BorderLayout.SOUTH);
@@ -51,6 +53,7 @@ public class AnimosityFrame extends JFrame {
 		this.B_resume.setActionCommand("RESUME");
 		this.B_savePNG.addActionListener(listener);
 		this.B_savePNG.setActionCommand("SAVEGRAPHS");
+		this.debugCheckBox.addActionListener(listener);
 		this.B_stop.setEnabled(false);
 		this.B_generate_creature.setEnabled(false);
 		this.B_generate_predator.setEnabled(false);

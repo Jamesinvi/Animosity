@@ -7,6 +7,10 @@ public class Vector {
     	x=x_;
     	y=y_;
     }
+    public Vector(Vector v) {
+    	x=v.x;
+    	y=v.y;
+    }
     void add(Vector v){
     	x=x+v.x;
     	y=y+v.y;

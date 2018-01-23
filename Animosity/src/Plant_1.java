@@ -1,3 +1,6 @@
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 public class Plant_1 extends Creature{
@@ -21,7 +24,7 @@ public class Plant_1 extends Creature{
 	}
 	private void reproduce() {
 		int rng=Utilities.RNGLocX();
-		if(rng>1700) {
+		if(rng>1600) {
 			world.frm.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
 			reproductionDelta=160;
 		}
@@ -40,5 +43,21 @@ public class Plant_1 extends Creature{
 	@Override
 	int getWidth() {
 		return width;
+	}
+
+	@Override
+	void display(Graphics2D g2) {
+		g2.setColor(Color.GREEN);
+		int rectX=(int)(this.getLocationX())-this.getWidth()/2;
+		int rectY=(int)(this.getLocationY())-this.getHeight()/2;
+		Rectangle2D rect=new Rectangle2D.Float(rectX,rectY,this.getWidth(),this.getHeight()); 
+		g2.fill(rect);
+		
+	}
+
+	@Override
+	void drawLineToTarget(Graphics2D g2) {
+		return;
+		
 	}
 }

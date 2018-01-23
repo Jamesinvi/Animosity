@@ -1,4 +1,8 @@
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
 public class CreatureTriangle extends Creature{
@@ -11,22 +15,25 @@ public class CreatureTriangle extends Creature{
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
-		this.maxforce=0.08f;
+		this.maxforce=0.2f;
 		this.maxspeed=1.7f;
 		this.radius=radius;
 		this.lifetime=800;
 		this.reproductionDelta=180;
 		this.adulthood=600;
-		this.health=250;
+		this.health=200;
+		this.perceptionRadius=500;
 	}
 
 	public void move(){
 		if(lifetime<adulthood && reproductionDelta<=0) {
-			if(world.frm.creatures.size()==500){
+			if(world.frm.creatures.size()>=500){
 				world.frm.makeSpace();
 			}
 			reproduce();
 			}
+		applyBehaviours(world.creaturelist);
+		update();
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -34,7 +41,7 @@ public class CreatureTriangle extends Creature{
 	}
 	private void reproduce() {
 		int rng=Utilities.RNGLocX();
-		if(rng>1790) {
+		if(rng>1500) {
 			world.frm.generateCreatureTriangle((int)this.getLocationX(),(int)this.getLocationY());
 			reproductionDelta=100;
 		}
@@ -60,14 +67,13 @@ public class CreatureTriangle extends Creature{
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close
-		for (int i=0;i<creatures.size();i++){
-			Creature other=creatures.get(i);
-			if(other instanceof CreatureTriangle) {
-				float dist=Vector.dist(location,other.getLocation());
+		for (int i=creatures.size()-1;i>=0;i--){
+			if(creatures.get(i) instanceof CreatureTriangle) {
+				float dist=Vector.dist(location,creatures.get(i).getLocation());
 				// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
 				if((dist>0)&&(dist<desiredSep)){
 					// Calculate vector pointing away from neighbor
-					Vector diff=Vector.sub(location, other.getLocation());
+					Vector diff=Vector.sub(location, creatures.get(i).getLocation());
 					diff.normalize();
 					diff.div(dist);			// Weight by distance
 					sum.add(diff);
@@ -96,11 +102,11 @@ public class CreatureTriangle extends Creature{
 		applyForce(seekForce);
 	}
 	Vector eat(ArrayList<Creature>list) {
-		Vector res=new Vector(0,0);
-		double max= Double.POSITIVE_INFINITY;
+		Vector res=new Vector(this.velocity);
+		double max= perceptionRadius;
 		Creature closest=null;
 		for (int i=0;i<list.size();i++) {
-			if(list.get(i).getClass()==CreaturePoint.class) {
+			if(list.get(i) instanceof CreaturePoint) {
 				float dist=Vector.dist(this.location, list.get(i).location);
 					if (dist<max) {
 						max=dist;
@@ -195,6 +201,34 @@ public class CreatureTriangle extends Creature{
 	public int getHeight() {
 		// TODO Auto-generated method stub
 		return height;
+	}
+
+	@Override
+	void display(Graphics2D g2) {
+		TriangleShape triangle=new TriangleShape(this.getWidth(),this.getHeight(),Color.BLUE);
+		int triangleX=(int)(this.getLocationX())-this.getWidth()/2;
+		int triangleY=(int)(this.getLocationY())+this.getHeight()/2;
+		Vector trianglePos=new Vector(triangleX,triangleY);
+		triangle.drawMe(g2, trianglePos);
+		if(world.debugging) {
+			drawLineToTarget(g2);
+			Ellipse2D perception=new Ellipse2D.Double(this.location.x-this.perceptionRadius/2,this.location.y-this.perceptionRadius/2,this.perceptionRadius,this.perceptionRadius);
+			g2.draw(perception);
+		}
+	}
+
+	@Override
+	void drawLineToTarget(Graphics2D g2) {
+		try {
+			Color red=new Color(1.0f,0f,0f,0.2f);
+			g2.setColor(red);
+			Creature target=this.targetCreature;
+			g2.draw(new Line2D.Float(this.getLocationX(),
+									 this.getLocationY(),
+									 target.getLocationX(),target.getLocationY()));
+			}catch (NullPointerException  | IndexOutOfBoundsException e) {
+			return;
+		}
 	}
 	
 }

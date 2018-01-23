@@ -21,7 +21,7 @@ public class CreaturePoint extends Creature {
 		this.perceptionRadius=500;
 	}
 
-	public void move(){
+	public void update(){
 		if(lifetime<adulthood && reproductionDelta<=0) {
 			if(world.frm.creatures.size()>=500){
 				world.frm.makeSpace();
@@ -29,7 +29,7 @@ public class CreaturePoint extends Creature {
 			reproduce();
 			}
 		applyBehaviours(world.creaturelist);
-		update();
+		lifeTick();
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -90,21 +90,23 @@ public class CreaturePoint extends Creature {
 	}
 	public void applyBehaviours(ArrayList<Creature>creatures){
 		Vector separationForce=separate(creatures);
-		Vector seekForce=seek(eat(world.plantlist));
+		Vector seekForce=seek(eat(creatures));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
 		applyForce(separationForce);
 		applyForce(seekForce);
 	}
 	Vector eat(ArrayList<Creature>list) {
-		Vector res=new Vector(this.velocity);
+		Vector res=new Vector(this.acceleration);
 		double max= perceptionRadius;
 		Creature closest=null;
 		for (int i=0;i<list.size();i++) {
-			float dist=Vector.dist(this.location, list.get(i).location);
-			if (dist<max) {
-				max=dist;
-				closest=list.get(i);
+			if(list.get(i) instanceof Plant_1) {
+				float dist=Vector.dist(this.location, list.get(i).location);
+				if (dist<max) {
+					max=dist;
+					closest=list.get(i);
+				}
 			}
 		}
 		try {
@@ -113,10 +115,9 @@ public class CreaturePoint extends Creature {
 				world.creaturelist.remove(closest);
 				health+=150;
 			}
-			res=closest.location;
 			this.targetCreature=closest;
+			res=closest.location;
 		}catch (NullPointerException e) {
-			closest=null;
 		}
 		return res;
 	}

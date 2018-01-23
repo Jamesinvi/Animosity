@@ -2,13 +2,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.JPanel;
 
 
@@ -19,7 +17,6 @@ public class Simulation extends JPanel implements Runnable {
 	private static final long serialVersionUID = 521807317949566808L;
 	//Frame  setup
 	AnimosityFrame frm;
-	Point mousePoint;
 	public final static int WIDTH=1840;
 	public final static int HEIGHT=500;
 	//Runtime checks and counters
@@ -59,7 +56,6 @@ public class Simulation extends JPanel implements Runnable {
 			frm.generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
 			frm.generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
 		}
-		updateLists();
 	}
 	public void run() {
 		long lastTime = System.nanoTime();
@@ -89,15 +85,13 @@ public class Simulation extends JPanel implements Runnable {
 	   }
 	      
 	}
-	
 	//TICK---MAIN LOGIC OF THE SIMULATION
 	private void tick() {
-		updateLists();
 		creaturelist=frm.creatures;
 		if (creaturelist.size()>0){
 			for (int i=0;i<creaturelist.size();i++){
 				Creature creatureI=creaturelist.get(i);
-				creatureI.move();
+				creatureI.update();
 			}
 		}
 		//Only send data once in a while to avoid overloading the system
@@ -107,11 +101,11 @@ public class Simulation extends JPanel implements Runnable {
 			int creaturePlantCount=0;
 			//Count Creatures and types
 			for (int i=0;i<creaturelist.size();i++){
-				if (creaturelist.get(i).getClass()==CreaturePoint.class){
+				if (creaturelist.get(i) instanceof CreaturePoint){
 					creaturePointCount++;
-				}else if(creaturelist.get(i).getClass()==CreatureTriangle.class){
+				}else if(creaturelist.get(i) instanceof CreatureTriangle){
 					creatureTriangleCount++;
-				}else if(creaturelist.get(i).getClass()==Plant_1.class) {
+				}else if(creaturelist.get(i) instanceof Plant_1) {
 					creaturePlantCount++;
 				}
 			}
@@ -135,29 +129,7 @@ public class Simulation extends JPanel implements Runnable {
 			g2.setColor(Color.LIGHT_GRAY);
 		}
 	}
-	    
-	void updateLists(){
-		for (int i=0;i<frm.creatures.size();i++) {
-			try {
-				if (frm.creatures.get(i)!=creaturelist.get(i)){
-					creaturelist.add(frm.creatures.get(i));
-					plantlist.add(frm.creatures.get(i));
-				}
-			}catch (Exception e) {
-				creaturelist.add(i, frm.creatures.get(i));;
-				plantlist.add(frm.creatures.get(i));
-			}
-		}
-		plantlist=new ArrayList<Creature>();
-		trianglelist=new ArrayList<Creature>();
-		for (int i=0;i<creaturelist.size();i++) {
-			if(creaturelist.get(i) instanceof Plant_1) {
-				plantlist.add(creaturelist.get(i));
-			}else if (creaturelist.get(i) instanceof CreatureTriangle) {
-				trianglelist.add(creaturelist.get(i));
-			}
-		}
-	}
+
 	//OTHER STATIC METHODS
 	static Vector pointToPoint(Point p){
     	Vector res=new Vector(p.x,p.y);

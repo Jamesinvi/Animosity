@@ -25,7 +25,7 @@ public class CreatureTriangle extends Creature{
 		this.perceptionRadius=500;
 	}
 
-	public void move(){
+	public void update(){
 		if(lifetime<adulthood && reproductionDelta<=0) {
 			if(world.frm.creatures.size()>=500){
 				world.frm.makeSpace();
@@ -33,7 +33,7 @@ public class CreatureTriangle extends Creature{
 			reproduce();
 			}
 		applyBehaviours(world.creaturelist);
-		update();
+		lifeTick();
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -95,7 +95,7 @@ public class CreatureTriangle extends Creature{
 	}
 	public void applyBehaviours(ArrayList<Creature>creatures){
 		Vector separationForce=separate(creatures);
-		Vector seekForce=seek(eat(world.creaturelist));
+		Vector seekForce=seek(eat(creatures));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
 		applyForce(separationForce);
@@ -108,10 +108,10 @@ public class CreatureTriangle extends Creature{
 		for (int i=0;i<list.size();i++) {
 			if(list.get(i) instanceof CreaturePoint) {
 				float dist=Vector.dist(this.location, list.get(i).location);
-					if (dist<max) {
-						max=dist;
-						closest=list.get(i);
-					}
+				if (dist<max) {
+					max=dist;
+					closest=list.get(i);
+				}
 			}
 		}
 		try {
@@ -123,6 +123,7 @@ public class CreatureTriangle extends Creature{
 			res=closest.location;
 			this.targetCreature=closest;
 		}catch (NullPointerException e) {
+			closest=null;
 		}
 		return res;
 	}

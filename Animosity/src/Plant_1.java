@@ -19,14 +19,17 @@ public class Plant_1 extends Creature{
 	}
 
 	@Override
-	void move() {
-		if(lifetime<adulthood && reproductionDelta<=0) {reproduce();}
+	void update() {
+		if(lifetime<adulthood && reproductionDelta<=0) {
+			reproduce();
+			}
+		lifeTick();
 	}
 	private void reproduce() {
 		int rng=Utilities.RNGLocX();
-		if(rng>1600) {
+		if(rng>1500) {
 			world.frm.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
-			reproductionDelta=160;
+			reproductionDelta=120;
 		}
 		
 	}

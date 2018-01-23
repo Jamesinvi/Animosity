@@ -4,6 +4,7 @@ import java.util.ArrayList;
 public abstract class Creature {
 	
 	long ID=0;
+	String Type="CREATURE";
 	Simulation world;
 	Creature targetCreature;
 	//CREATURE PARAMETERS
@@ -28,14 +29,14 @@ public abstract class Creature {
 	int radius;
 	
 	
-	abstract void move();
+	abstract void update();
 	abstract void applyBehaviours(ArrayList<Creature> a);
 	abstract void drawLineToTarget(Graphics2D g2);
 	abstract void display(Graphics2D g2);
 	abstract int getHeight();
 	abstract int getWidth();
 
-	public void update(){
+	public void lifeTick(){
 		if(this.lifetime>0 && this.health>0){
 			this.setLifetime(this.lifetime-1);
 			this.setReproductionDelta(this.reproductionDelta-1);

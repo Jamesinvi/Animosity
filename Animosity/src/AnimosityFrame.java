@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -9,7 +10,7 @@ public class AnimosityFrame extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 4091715683579074343L;
-	ArrayList<Creature>creatures=new ArrayList<Creature>();
+	List<Creature> creatures=new ArrayList<Creature>();
 	String name;
 	static double version=0.1;
 	Simulation simulation=new Simulation(this);

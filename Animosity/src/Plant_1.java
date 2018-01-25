@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Plant_1 extends Creature{
 	Plant_1(Simulation world,float posX, float posY, int radius){
@@ -19,31 +20,33 @@ public class Plant_1 extends Creature{
 	}
 
 	@Override
-	void update() {
-		if(lifetime<adulthood && reproductionDelta<=0) {
-			reproduce();
-			}
-		lifeTick();
+	void move() {
+		if(lifetime<adulthood && reproductionDelta<=0) {reproduce();}
+		update();
 	}
 	private void reproduce() {
 		int rng=Utilities.RNGLocX();
-		if(rng>1500) {
+		if(rng>1600) {
 			world.frm.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
-			reproductionDelta=120;
+			reproductionDelta=160;
 		}
 		
 	}
-
 	@Override
-	void applyBehaviours(ArrayList<Creature> a) {
+	public void die() {
+		world.creaturelist.remove(this);
+		world.plantlist.remove(this);
 	}
 
 	@Override
+	void applyBehaviours() {
+	}
+
 	int getHeight() {
 		return height;
 	}
 
-	@Override
+
 	int getWidth() {
 		return width;
 	}
@@ -62,5 +65,9 @@ public class Plant_1 extends Creature{
 	void drawLineToTarget(Graphics2D g2) {
 		return;
 		
+	}
+	@Override 
+	public String toString() {
+		return "Plant_1";
 	}
 }

@@ -3,6 +3,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CreaturePoint extends Creature {
 	
@@ -21,15 +22,15 @@ public class CreaturePoint extends Creature {
 		this.perceptionRadius=500;
 	}
 
-	public void update(){
+	public void move(){
 		if(lifetime<adulthood && reproductionDelta<=0) {
 			if(world.frm.creatures.size()>=500){
 				world.frm.makeSpace();
 			}
 			reproduce();
 			}
-		applyBehaviours(world.creaturelist);
-		lifeTick();
+		applyBehaviours();
+		update();
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
@@ -57,7 +58,7 @@ public class CreaturePoint extends Creature {
 		steering.limit(maxforce);
 		return steering;
 	}
-	Vector separate(ArrayList<Creature>creatures){
+	Vector separate(List<? extends Creature>creatures){
 		float desiredSep=radius;
 		Vector sum=new Vector(0,0);
 		int count=0;
@@ -88,38 +89,41 @@ public class CreaturePoint extends Creature {
 		return sum;
 		
 	}
-	public void applyBehaviours(ArrayList<Creature>creatures){
-		Vector separationForce=separate(creatures);
-		Vector seekForce=seek(eat(creatures));
+	public void applyBehaviours(){
+		Vector separationForce=separate(world.pointlist);
+		Vector seekForce=seek(eat(world.plantlist));
 		separationForce.mult(1.5f);
 		seekForce.mult(1);
 		applyForce(separationForce);
 		applyForce(seekForce);
 	}
-	Vector eat(ArrayList<Creature>list) {
-		Vector res=new Vector(this.acceleration);
+	Vector eat(List<? extends Creature>list) {
+		Vector res=new Vector(this.velocity);
 		double max= perceptionRadius;
 		Creature closest=null;
 		for (int i=0;i<list.size();i++) {
-			if(list.get(i) instanceof Plant_1) {
-				float dist=Vector.dist(this.location, list.get(i).location);
-				if (dist<max) {
-					max=dist;
-					closest=list.get(i);
-				}
+			float dist=Vector.dist(this.location, list.get(i).location);
+			if (dist<max) {
+				max=dist;
+				closest=list.get(i);
 			}
 		}
 		try {
 			if (Vector.dist(this.location, closest.location)<closest.radius && closest instanceof Plant_1) {
-				list.remove(closest);
-				world.creaturelist.remove(closest);
+				closest.die();
 				health+=150;
 			}
-			this.targetCreature=closest;
 			res=closest.location;
+			this.targetCreature=closest;
 		}catch (NullPointerException e) {
+			closest=null;
 		}
 		return res;
+	}
+	@Override
+	public void die() {
+		world.creaturelist.remove(this);
+		world.pointlist.remove(this);
 	}
 	public int getRadius() {
 		return radius;
@@ -170,9 +174,7 @@ public class CreaturePoint extends Creature {
 	}
 	@Override
 	public String toString() {
-		return "CreaturePoint [world=" + world + ", maxforce=" + maxforce + ", maxspeed=" + maxspeed + ", lifetime="
-				+ lifetime + ", distance=" + distance + ", location=" + location + ", velocity=" + velocity
-				+ ", acceleration=" + acceleration + ", radius=" + radius + "]";
+		return "CreaturePoint";
 	}
 	
 
@@ -184,18 +186,6 @@ public class CreaturePoint extends Creature {
 		//System.out.println("Value: "+value+" Start1: "+start1+" Stop1: "+stop1+" Start2: "+start1+" Stop2: "+stop2);
 		//System.out.println("t1: "+t1+" t2: "+t2+"res: "+res);
 		return res;
-	}
-
-	@Override
-	int getHeight() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	int getWidth() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override

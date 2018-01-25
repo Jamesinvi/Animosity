@@ -1,13 +1,14 @@
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Creature {
 	
 	long ID=0;
-	String Type="CREATURE";
 	Simulation world;
 	Creature targetCreature;
 	//CREATURE PARAMETERS
+
 	float maxforce;
 	float maxspeed;
 	float distance;
@@ -29,19 +30,19 @@ public abstract class Creature {
 	int radius;
 	
 	
-	abstract void update();
-	abstract void applyBehaviours(ArrayList<Creature> a);
+	abstract void move();
+	abstract void applyBehaviours();
 	abstract void drawLineToTarget(Graphics2D g2);
 	abstract void display(Graphics2D g2);
-	abstract int getHeight();
-	abstract int getWidth();
+	abstract void die();
 
-	public void lifeTick(){
+	public void update(){
 		if(this.lifetime>0 && this.health>0){
 			this.setLifetime(this.lifetime-1);
 			this.setReproductionDelta(this.reproductionDelta-1);
 			this.setHealth(this.health-1);
 		}else {
+			die();
 			world.creaturelist.remove(this);
 		}
 	}
@@ -102,12 +103,6 @@ public abstract class Creature {
 
 	public void applyForce(Vector f){
 		acceleration.add(f);
-	}
-	@Override
-	public String toString() {
-		return "CreaturePoint [world=" + world + ", maxforce=" + maxforce + ", maxspeed=" + maxspeed + ", distance="
-				+ distance + ", location=" + location + ", velocity=" + velocity + ", acceleration=" + acceleration
-				+ ", radius=" + radius + "]";
 	}
 	public void debugString(){
 		System.out.print(this.getClass()+" ");

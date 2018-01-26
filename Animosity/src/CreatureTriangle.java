@@ -10,6 +10,8 @@ public class CreatureTriangle extends Creature{
 
 	
 	CreatureTriangle(Simulation world,float posX, float posY, int radius){
+		DNA[0]=Utilities.randFloat(-1, 1);
+		DNA[1]=Utilities.randFloat(1, 2);
 		this.world=world;
 		this.width=5;
 		this.height=5;
@@ -17,7 +19,7 @@ public class CreatureTriangle extends Creature{
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
 		this.maxforce=0.2f;
-		this.maxspeed=1.7f;
+		this.maxspeed=2f;
 		this.radius=radius;
 		this.lifetime=800;
 		this.reproductionDelta=180;
@@ -28,11 +30,8 @@ public class CreatureTriangle extends Creature{
 
 	public void move(){
 		if(lifetime<adulthood && reproductionDelta<=0) {
-			if(world.frm.creatures.size()>=500){
-				world.frm.makeSpace();
-			}
 			reproduce();
-			}
+		}
 		applyBehaviours();
 		update();
 		velocity.add(acceleration);
@@ -41,12 +40,14 @@ public class CreatureTriangle extends Creature{
 		acceleration.mult(0);
 	}
 	private void reproduce() {
-		int rng=Utilities.RNGLocX();
-		if(rng>1500) {
-			world.frm.generateCreatureTriangle((int)this.getLocationX(),(int)this.getLocationY());
-			reproductionDelta=100;
+		int rng=Utilities.random.nextInt(100);
+		if(rng>90) {
+			Creature child=world.generateCreatureTriangle((int)this.getLocationX(),(int)this.getLocationY());
+			if(rng>95) {
+				child.mutate();
+			}
+			reproductionDelta=250;
 		}
-		
 	}
 	public Vector seek(Vector target){
 		Vector desired=Vector.sub(target,location);
@@ -95,12 +96,12 @@ public class CreatureTriangle extends Creature{
 		
 	}
 	public void applyBehaviours(){
-		Vector separationForce=separate(world.trianglelist);
-		Vector seekForce=seek(eat(world.creaturelist));
-		separationForce.mult(1.5f);
-		seekForce.mult(1);
-		applyForce(separationForce);
-		applyForce(seekForce);
+		Vector sepForceTriangles=separate(world.trianglelist);
+		Vector seekForcePoints=seek(eat(world.creaturelist));
+		sepForceTriangles.mult(DNA[1]);
+		seekForcePoints.mult(DNA[0]);
+		applyForce(sepForceTriangles);
+		applyForce(seekForcePoints);
 	}
 	Vector eat(List<Creature>list) {
 		Vector res=new Vector(this.velocity);
@@ -131,6 +132,12 @@ public class CreatureTriangle extends Creature{
 		world.creaturelist.remove(this);
 		world.trianglelist.remove(this);
 	}
+	@Override
+	public void mutate() {
+		this.DNA[0]=this.DNA[0]+Utilities.randFloat(-0.1f, 0.1f);
+		this.DNA[1]=this.DNA[1]+Utilities.randFloat(-0.1f, 0.1f);
+	}
+	
 	public int getRadius() {
 		return radius;
 	}
@@ -222,6 +229,7 @@ public class CreatureTriangle extends Creature{
 	void drawLineToTarget(Graphics2D g2) {
 		try {
 			Color red=new Color(1.0f,0f,0f,0.2f);
+			drawDNALines(g2);
 			g2.setColor(red);
 			Creature target=this.targetCreature;
 			g2.draw(new Line2D.Float(this.getLocationX(),
@@ -230,6 +238,17 @@ public class CreatureTriangle extends Creature{
 			}catch (NullPointerException  | IndexOutOfBoundsException e) {
 			return;
 		}
+	}
+
+	@Override
+	void drawDNALines(Graphics2D g2) {
+		Line2D line=new Line2D.Float(this.getLocationX(), this.getLocationY(), this.getLocationX()+this.velocity.x*DNA[0]*30,this.getLocationY()+this.velocity.y*DNA[0]*30);
+		Line2D line2=new Line2D.Float(this.getLocationX(), this.getLocationY(), this.getLocationX()-this.velocity.x*DNA[1]*30,this.getLocationY()-this.velocity.y*DNA[1]*30);
+		g2.setColor(Color.CYAN);
+		g2.draw(line);
+		g2.setColor(Color.MAGENTA);
+		g2.draw(line2);
+		
 	}
 	
 }

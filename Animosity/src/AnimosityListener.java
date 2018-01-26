@@ -12,22 +12,17 @@ public class AnimosityListener implements ActionListener{
 	}
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if (arg0.getActionCommand().equals("GENERATE")){
-			frm.B_resume.setEnabled(true);
-			frm.B_stop.setEnabled(true);
-			if(frm.creatures.size()==500){
-				frm.makeSpace();
-			}
-			frm.generateCreaturePoint(Utilities.RNGLocX(),Utilities.RNGLocY());
+		if (arg0.getActionCommand().equals("GENERATEPOINT")){
+			frm.simulation.generateCreaturePoint(Utilities.RNGLocX(),Utilities.RNGLocY());
 		}
 		else if (arg0.getActionCommand().equals("GENERATEPREDATOR")){
-			if(frm.creatures.size()==500){
-				frm.makeSpace();
-			}
-			frm.generateCreatureTriangle(Utilities.RNGLocX(),Utilities.RNGLocY());
+			frm.simulation.generateCreatureTriangle(Utilities.RNGLocX(),Utilities.RNGLocY());
+		}else if (arg0.getActionCommand().equals("GENERATEPLANT")) {
+			frm.simulation.generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
 		}
 		else if (arg0.getActionCommand().equals("RESUME")){
 			frm.simulation.start();
+			frm.B_generate_plant.setEnabled(true);
 			frm.B_generate_creature.setEnabled(true);
 			frm.B_generate_predator.setEnabled(true);
 			frm.B_stop.setEnabled(true);
@@ -35,6 +30,7 @@ public class AnimosityListener implements ActionListener{
 		}
 		else if(arg0.getActionCommand().equals("STOP")){
 			frm.simulation.stop();
+			frm.B_generate_plant.setEnabled(false);
 			frm.B_generate_creature.setEnabled(false);
 			frm.B_generate_predator.setEnabled(false);
 			frm.B_resume.setEnabled(true);

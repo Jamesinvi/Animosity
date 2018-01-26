@@ -8,7 +8,7 @@ public abstract class Creature {
 	Simulation world;
 	Creature targetCreature;
 	//CREATURE PARAMETERS
-
+	float [] DNA=new float[5];
 	float maxforce;
 	float maxspeed;
 	float distance;
@@ -33,6 +33,7 @@ public abstract class Creature {
 	abstract void move();
 	abstract void applyBehaviours();
 	abstract void drawLineToTarget(Graphics2D g2);
+	abstract void drawDNALines(Graphics2D g2);
 	abstract void display(Graphics2D g2);
 	abstract void die();
 
@@ -45,6 +46,9 @@ public abstract class Creature {
 			die();
 			world.creaturelist.remove(this);
 		}
+	}
+	void mutate() {
+		
 	}
 	//GETTERS AND SETTERS + TOSTRING METHODS
 	public int getHealth() {

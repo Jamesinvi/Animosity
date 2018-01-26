@@ -29,6 +29,15 @@ public class Vector {
     		div(m);
     	}
     }
+    Vector normal(Vector v) {
+    	Vector res=new Vector(v.x,v.y);
+    	float m=mag();
+    	if (m!=0) {
+    		res.div(m);
+    	}
+    	return res;
+  
+    }
     void setMag(float x){
     	this.normalize();
     	this.mult(x);

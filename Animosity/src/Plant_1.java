@@ -13,7 +13,7 @@ public class Plant_1 extends Creature{
 		this.location=new Vector(posX,posY);
 		this.radius=radius;
 		this.lifetime=10000;
-		this.reproductionDelta=80;
+		this.reproductionDelta=100;
 		this.adulthood=9999;
 		this.health=lifetime;
 		this.targetCreature=null;
@@ -25,10 +25,10 @@ public class Plant_1 extends Creature{
 		update();
 	}
 	private void reproduce() {
-		int rng=Utilities.RNGLocX();
-		if(rng>1600) {
-			world.frm.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
-			reproductionDelta=160;
+		int rng=Utilities.random.nextInt(100);
+		if(rng>95) {
+			world.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
+			reproductionDelta=200;
 		}
 		
 	}
@@ -69,5 +69,11 @@ public class Plant_1 extends Creature{
 	@Override 
 	public String toString() {
 		return "Plant_1";
+	}
+
+	@Override
+	void drawDNALines(Graphics2D g2) {
+		// TODO Auto-generated method stub
+		
 	}
 }

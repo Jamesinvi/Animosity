@@ -3,44 +3,49 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CreaturePoint extends Creature {
 	
 	CreaturePoint(Simulation world,float posX, float posY, int radius){
+		DNA[0]=Utilities.randFloat(-1, 1);
+		DNA[1]=Utilities.randFloat(1, 2);
 		this.world=world;
 		this.radius=radius;
 		this.location=new Vector(posX,posY);
 		this.velocity=new Vector(0,0);
 		this.acceleration=new Vector(0,0);
-		this.maxforce=0.1f;
+		this.maxforce=0.4f;
 		this.maxspeed=1.9f;
 		this.lifetime=1000;
-		this.reproductionDelta=150;
+		this.reproductionDelta=260;
 		this.adulthood=800;
 		this.health=250;
-		this.perceptionRadius=500;
+		this.perceptionRadius=300;
 	}
 
 	public void move(){
-		if(lifetime<adulthood && reproductionDelta<=0) {
-			if(world.frm.creatures.size()>=500){
-				world.frm.makeSpace();
-			}
-			reproduce();
-			}
-		applyBehaviours();
 		update();
+		if(lifetime<adulthood && reproductionDelta<=0) {
+			reproduce();
+		}
+		applyBehaviours();
 		velocity.add(acceleration);
 		velocity.limit(maxspeed);
 		location.add(velocity);
 		acceleration.mult(0);
 	}
 	private void reproduce() {
-		int rng=Utilities.RNGLocX();
-		if(rng>1500) {
-			world.frm.generateCreaturePoint((int)this.getLocationX(),(int)this.getLocationY());
-			reproductionDelta=100;
+		int rng=Utilities.random.nextInt(100);
+		if(rng>95) {
+			Creature child=world.generateCreaturePoint((int)this.getLocationX(),(int)this.getLocationY());
+			child.DNA=Arrays.copyOf(this.DNA, this.DNA.length);
+			int rng2=Utilities.random.nextInt(100);
+			if(rng2>96) {
+				child.mutate();
+			}
+			reproductionDelta=260;
 		}
 	}
 
@@ -59,22 +64,20 @@ public class CreaturePoint extends Creature {
 		return steering;
 	}
 	Vector separate(List<? extends Creature>creatures){
-		float desiredSep=radius;
+		float desiredSep=radius*3;
 		Vector sum=new Vector(0,0);
 		int count=0;
 		// For every creature in the system, check if it's too close
 		for (int i=creatures.size()-1;i>=0;i--){
-			if(creatures.get(i) instanceof CreaturePoint) {
-				float dist=Vector.dist(location,creatures.get(i).getLocation());
-				// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-				if((dist>0)&&(dist<desiredSep)){
-					// Calculate vector pointing away from neighbor
-					Vector diff=Vector.sub(location, creatures.get(i).getLocation());
-					diff.normalize();
-					diff.div(dist);			// Weight by distance
-					sum.add(diff);
-					count++;				//keep track of the number of creatures
-				}
+			float dist=Vector.dist(location,creatures.get(i).getLocation());
+			// If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+			if((dist>0)&&(dist<desiredSep)){
+				// Calculate vector pointing away from neighbor
+				Vector diff=Vector.sub(location, creatures.get(i).getLocation());
+				diff.normalize();
+				diff.div(dist);			// Weight by distance
+				sum.add(diff);
+				count++;				//keep track of the number of creatures
 			}
 		}
 		// Average -- divide by how many
@@ -90,12 +93,12 @@ public class CreaturePoint extends Creature {
 		
 	}
 	public void applyBehaviours(){
-		Vector separationForce=separate(world.pointlist);
-		Vector seekForce=seek(eat(world.plantlist));
-		separationForce.mult(1.5f);
-		seekForce.mult(1);
-		applyForce(separationForce);
-		applyForce(seekForce);
+		Vector sepForcePoints=separate(world.pointlist);
+		Vector seekForcePlants=seek(eat(world.plantlist));
+		sepForcePoints.mult(DNA[1]);
+		seekForcePlants.mult(DNA[0]);
+		applyForce(sepForcePoints);;
+		applyForce(seekForcePlants);
 	}
 	Vector eat(List<? extends Creature>list) {
 		Vector res=new Vector(this.velocity);
@@ -111,7 +114,7 @@ public class CreaturePoint extends Creature {
 		try {
 			if (Vector.dist(this.location, closest.location)<closest.radius && closest instanceof Plant_1) {
 				closest.die();
-				health+=150;
+				this.addHealth(150);;
 			}
 			res=closest.location;
 			this.targetCreature=closest;
@@ -120,10 +123,32 @@ public class CreaturePoint extends Creature {
 		}
 		return res;
 	}
+	@Override 
+	public void mutate() {
+		int number=Utilities.random.nextInt(100);
+		if(number<50) {
+			this.DNA[0]=this.DNA[0]+Utilities.randFloat(-0.1f, 0.1f);
+			System.out.println("DNA[0]mutated");
+		}else if(number>50) {
+			this.DNA[1]=this.DNA[1]+Utilities.randFloat(-0.1f, 0.1f);
+			System.out.println("DNA[1]mutated");
+		}
+	}
 	@Override
 	public void die() {
 		world.creaturelist.remove(this);
 		world.pointlist.remove(this);
+
+	}
+	public void addHealth(int health) {
+		if (this.health+health<300) {
+			this.health+=health;
+		}
+		else if (this.health>300) {
+			return;
+		}else {
+			this.health=300;
+		}
 	}
 	public int getRadius() {
 		return radius;
@@ -194,6 +219,10 @@ public class CreaturePoint extends Creature {
 		Ellipse2D circle=new Ellipse2D.Double(this.location.x-this.radius/2,this.location.y-this.radius/2,this.radius,this.radius);
 		g2.fill(circle);
 		if(world.debugging) {
+			Color white=new Color(1.0f,1.0f,1.0f,0.14f);
+			//g2.drawString(Float.toString(DNA[2]), this.location.x+radius, this.location.y+radius);
+			drawDNALines(g2);
+			g2.setColor(white);
 			drawLineToTarget(g2);
 			Ellipse2D perception=new Ellipse2D.Double(this.location.x-this.perceptionRadius/2,this.location.y-this.perceptionRadius/2,this.perceptionRadius,this.perceptionRadius);
 			g2.draw(perception);
@@ -203,8 +232,6 @@ public class CreaturePoint extends Creature {
 	@Override
 	void drawLineToTarget(Graphics2D g2) {
 		try {
-			Color red=new Color(1.0f,1.0f,1.0f,0.2f);
-			g2.setColor(red);
 			Creature target=this.targetCreature;
 			g2.draw(new Line2D.Float(this.getLocationX(),
 									 this.getLocationY(),
@@ -212,5 +239,16 @@ public class CreaturePoint extends Creature {
 			}catch (NullPointerException  | IndexOutOfBoundsException e) {
 			return;
 		}
+	}
+	@Override 
+	void drawDNALines(Graphics2D g2) {
+		float xCoord=this.velocity.normal(velocity).x;
+		float yCoord=this.velocity.normal(velocity).y;
+		Line2D line=new Line2D.Float(this.getLocationX(), this.getLocationY(), this.getLocationX()+xCoord*DNA[0]*30,this.getLocationY()+yCoord*DNA[0]*30);
+		Line2D line2=new Line2D.Float(this.getLocationX(), this.getLocationY(),this.getLocationX()-xCoord*DNA[1]*15,this.getLocationY()-yCoord*DNA[1]*15);
+		g2.setColor(Color.CYAN);
+		g2.draw(line);
+		g2.setColor(Color.MAGENTA);
+		g2.draw(line2);
 	}
 }

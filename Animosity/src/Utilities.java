@@ -1,19 +1,26 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 
 public class Utilities {
+	static Random random=new Random();
 	static 	public int RNGLocX() {
-		int res=(int)(Math.random()*Simulation.WIDTH);
+		int res=random.nextInt(Simulation.WIDTH);
 		return res;
 	}
 	static public int RNGLocY() {
-		int res=(int)(Math.random()*Simulation.HEIGHT);
+		int res=random.nextInt(Simulation.HEIGHT);
 		return res;
 	}
-	static public final String saveChartToPNG(final JFreeChart chart, String fileName, final int width, final int height) throws IOException {
+	public static float randFloat(float min, float max) {
+	    float result = random.nextFloat() * (max - min) + min;
+	    return result;
+
+	}
+	final static String saveChartToPNG(final JFreeChart chart, String fileName, final int width, final int height) throws IOException {
         String result = null;
         
         if (chart != null) {

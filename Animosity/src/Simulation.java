@@ -1,3 +1,4 @@
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -30,6 +31,10 @@ public class Simulation extends JPanel implements Runnable {
 	List<Plant_1>plantlist=new ArrayList<Plant_1>();
 	List<CreatureTriangle>trianglelist=new ArrayList<CreatureTriangle>();
 	List<CreaturePoint> pointlist=new ArrayList<CreaturePoint>();
+	private boolean paused=false;
+	private int frameCount=0;
+	private int fps=60;
+	private float interpolation=0;
 
 	
 	//CONSTRUCTOR
@@ -54,41 +59,91 @@ public class Simulation extends JPanel implements Runnable {
 	/////////////////////////////////////////////
 	public void initSetup() {
 		for(int i=0;i<20;i++) {
-			frm.generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
-			frm.generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
-			frm.generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
+			generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
+			generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
+			//generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
 		}
 	}
 	public void run() {
-		long lastTime = System.nanoTime();
-	    final double ns = 1000000000.0 / 60.0;              // Here you can change the rate
-	    double delta = 0;
-	    long timer = System.currentTimeMillis();
-	    int frames = 0;
-	    int updates = 0;
-	    while (running) {
-	    	long now = System.nanoTime();
-	        delta += (now - lastTime) / ns;
-	        lastTime = now;
-	        while (delta >= 1) {
-	           tick();
-	           delta--;
-	           updates++;   
-		       repaint();
-		       frames++;			// Anything put inside this while loop will be executed 60 times per second
-	        }       
-	        						// Anything put outside is executed as many times it can --add repaint() method here later
-	        if (System.currentTimeMillis() - timer > 1000) {
-	           timer += 1000;
-	           frm.setTitle(frm.name+ "--"+updates + " ups, " + frames + " fps");
-	           updates = 0;
-	           frames = 0;
-	        }
-	   }
+		  //This value would probably be stored elsewhere.
+	      final double GAME_HERTZ = 60.0;
+	      //Calculate how many ns each frame should take for our target game hertz.
+	      final double TIME_BETWEEN_UPDATES = 1000000000 / GAME_HERTZ;
+	      //At the very most we will update the game this many times before a new render.
+	      //If you're worried about visual hitches more than perfect timing, set this to 1.
+	      final int MAX_UPDATES_BEFORE_RENDER = 5;
+	      //We will need the last update time.
+	      double lastUpdateTime = System.nanoTime();
+	      //Store the last time we rendered.
+	      double lastRenderTime = System.nanoTime();
 	      
+	      //If we are able to get as high as this FPS, don't render again.
+	      final double TARGET_FPS = 60;
+	      final double TARGET_TIME_BETWEEN_RENDERS = 1000000000 / TARGET_FPS;
+	      
+	      //Simple way of finding FPS.
+	      int lastSecondTime = (int) (lastUpdateTime / 1000000000);
+	      
+	      while (running)
+	      {
+	         double now = System.nanoTime();
+	         int updateCount = 0;
+	         
+	         if (!paused)
+	         {
+	             //Do as many game updates as we need to, potentially playing catchup.
+	            while( now - lastUpdateTime > TIME_BETWEEN_UPDATES && updateCount < MAX_UPDATES_BEFORE_RENDER )
+	            {
+	               tick();
+	               lastUpdateTime += TIME_BETWEEN_UPDATES;
+	               updateCount++;
+	            }
+	   
+	            //If for some reason an update takes forever, we don't want to do an insane number of catchups.
+	            //If you were doing some sort of game that needed to keep EXACT time, you would get rid of this.
+	            if ( now - lastUpdateTime > TIME_BETWEEN_UPDATES)
+	            {
+	               lastUpdateTime = now - TIME_BETWEEN_UPDATES;
+	            }
+	         
+	            //Render. To do so, we need to calculate interpolation for a smooth render.
+	            float interpolation = Math.min(1.0f, (float) ((now - lastUpdateTime) / TIME_BETWEEN_UPDATES) );
+	            drawSim(interpolation);
+	            lastRenderTime = now;
+	         
+	            //Update the frames we got.
+	            int thisSecond = (int) (lastUpdateTime / 1000000000);
+	            if (thisSecond > lastSecondTime)
+	            {
+	               fps = frameCount;
+	               frameCount = 0;
+	               lastSecondTime = thisSecond;
+	            }
+	         
+	            //Yield until it has been at least the target time between renders. This saves the CPU from hogging.
+	            while ( now - lastRenderTime < TARGET_TIME_BETWEEN_RENDERS && now - lastUpdateTime < TIME_BETWEEN_UPDATES)
+	            {
+	               Thread.yield();
+	            
+	               //This stops the app from consuming all your CPU. It makes this slightly less accurate, but is worth it.
+	               //You can remove this line and it will still work (better), your CPU just climbs on certain OSes.
+	               //FYI on some OS's this can cause pretty bad stuttering. Scroll down and have a look at different peoples' solutions to this.
+	               try {Thread.sleep(1);} catch(Exception e) {} 
+	            
+	               now = System.nanoTime();
+	            }
+	         }
+	      }
 	}
+	private void drawSim(float interpolation) {
+	  this.setInterpolation(interpolation);
+	  this.repaint();
+	}
+    public void setInterpolation(float interp) {
+       interpolation = interp;
+    }
+	   
 	void updatelists(){
-		creaturelist=frm.creatures;
 		for (Creature creature:creaturelist) {
 			if (creature instanceof Plant_1 && !plantlist.contains(creature)) {
 				plantlist.add((Plant_1)creature);
@@ -123,6 +178,30 @@ public class Simulation extends JPanel implements Runnable {
 		}
 		tickCount++;;
 		delta++;
+	}
+	//CREATURE GENERATOR METHODS
+	Creature generateCreaturePoint(int x,int y){
+		Creature res=new CreaturePoint(this,x,y,4);
+		if (creaturelist.size()==5000) makeSpace();
+		creaturelist.add(res);
+		return res;
+	}
+	Creature generateCreatureTriangle(int x,int y){
+		Creature res=new CreatureTriangle(this,x,y,4);
+		if (creaturelist.size()==5000) makeSpace();
+		creaturelist.add(new CreatureTriangle(this,x,y,4));
+		return res;
+	}
+	void generatePlant_1(int x,int y){
+		if (creaturelist.size()==5000) {
+			makeSpace();
+		}
+		creaturelist.add(new Plant_1(this,x,y,5));
+	}
+	void makeSpace() {
+		for (int i=0;i<300;i++) {
+			plantlist.get(i).die();
+		}
 	}
 	//ALL PAINTING HAPPENS HERE 	
 	public void paintComponent(Graphics g){

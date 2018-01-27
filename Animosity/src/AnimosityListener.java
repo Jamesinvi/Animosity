@@ -2,7 +2,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
-import javax.swing.JCheckBox;
 
 public class AnimosityListener implements ActionListener{
 	AnimosityFrame frm;
@@ -37,12 +36,34 @@ public class AnimosityListener implements ActionListener{
 			frm.B_stop.setEnabled(false);
 		}else if(arg0.getActionCommand().equals("SAVEGRAPHS")) {
 			try {
-				Utilities.saveChartToPNG(frm.northPanel.areaChart, "areachart", 1920, 1080);
-				Utilities.saveChartToPNG(frm.northPanel.XYChart, "xychart", 1920, 1080);
+				Utilities.saveChartToPNG(frm.graphPanel.areaChart, "areachart", 1920, 1080);
+				Utilities.saveChartToPNG(frm.graphPanel.XYChart, "xychart", 1920, 1080);
 				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}else if(arg0.getActionCommand().equals("CLEARGRAPHS")) {
+			frm.graphPanel.xySpeciesOne.clear();
+			frm.graphPanel.xySpeciesTwo.clear();
+			frm.graphPanel.xySpeciesThree.clear();
+			frm.graphPanel.xyPopulationToT.clear();
+		}
+		else if(arg0.getActionCommand().equals("UPDATEVALUES")) {
+			CreatureTriangle.maxspeedVal=Float.parseFloat(frm.predatorSpeed.getText());
+			CreatureTriangle.maxforceVal=Float.parseFloat(frm.predatorForce.getText());
+			CreatureTriangle.lifetimeVal=Integer.parseInt(frm.predatorLifeTime.getText());
+			CreatureTriangle.repdeltaVal=Integer.parseInt(frm.predatorRepDelta.getText());
+			CreatureTriangle.adulthoodVal=Integer.parseInt(frm.predatorAdulthood.getText());
+			CreatureTriangle.healthVal=Integer.parseInt(frm.predatorHealth.getText());
+			CreatureTriangle.perceptionRadVal=Integer.parseInt(frm.predatorVision.getText());
+			CreaturePoint.maxspeedVal=Float.parseFloat(frm.creatureSpeed.getText());
+			CreaturePoint.maxforceVal=Float.parseFloat(frm.creatureForce.getText());
+			CreaturePoint.lifetimeVal=Integer.parseInt(frm.creatureLifeTime.getText());
+			CreaturePoint.repdeltaVal=Integer.parseInt(frm.creatureRepDelta.getText());
+			CreaturePoint.adulthoodVal=Integer.parseInt(frm.creatureAdulthood.getText());
+			CreaturePoint.healthVal=Integer.parseInt(frm.creatureHealth.getText());
+			CreaturePoint.perceptionRadVal=Integer.parseInt(frm.creatureVision.getText());
+			
 		}else if (arg0.getSource().equals(frm.debugCheckBox)){
 			if(frm.debugCheckBox.isSelected()) {
 				frm.simulation.debugging=true;

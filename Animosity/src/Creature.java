@@ -1,6 +1,4 @@
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class Creature {
 	

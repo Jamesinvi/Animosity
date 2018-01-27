@@ -1,19 +1,16 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Plant_1 extends Creature{
 	Plant_1(Simulation world,float posX, float posY, int radius){
 		this.world=world;
-		this.width=5;
-		this.height=5;
+		this.width=radius;
+		this.height=radius*2;
 		this.radius=radius;
 		this.location=new Vector(posX,posY);
 		this.radius=radius;
 		this.lifetime=10000;
-		this.reproductionDelta=100;
+		this.reproductionDelta=600;
 		this.adulthood=9999;
 		this.health=lifetime;
 		this.targetCreature=null;
@@ -28,7 +25,7 @@ public class Plant_1 extends Creature{
 		int rng=Utilities.random.nextInt(100);
 		if(rng>95) {
 			world.generatePlant_1(Utilities.RNGLocX(),Utilities.RNGLocY());
-			reproductionDelta=200;
+			reproductionDelta=500;
 		}
 		
 	}
@@ -53,12 +50,16 @@ public class Plant_1 extends Creature{
 
 	@Override
 	void display(Graphics2D g2) {
-		g2.setColor(Color.GREEN);
-		int rectX=(int)(this.getLocationX())-this.getWidth()/2;
-		int rectY=(int)(this.getLocationY())-this.getHeight()/2;
-		Rectangle2D rect=new Rectangle2D.Float(rectX,rectY,this.getWidth(),this.getHeight()); 
-		g2.fill(rect);
-		
+
+        g2.setColor(Utilities.my_Brown);
+        g2.fillRect((int)this.location.x-this.width/2, (int)this.location.y-this.height/2, width-2, height);
+
+        g2.setColor(Utilities.my_green);
+        g2.fillOval((int)this.location.x-this.radius/2-1, (int)this.location.y-this.radius, this.radius, this.radius);
+        g2.fillOval((int)this.location.x-this.radius/2-1, (int)this.location.y-this.radius-4, this.radius, this.radius);
+        g2.fillOval((int)this.location.x-this.radius/2+3-1, (int)this.location.y-this.radius, this.radius, this.radius);
+        g2.fillOval((int)this.location.x-this.radius/2-3-1, (int)this.location.y-this.radius, this.radius, this.radius);
+		g2.setColor(Color.white);
 	}
 
 	@Override

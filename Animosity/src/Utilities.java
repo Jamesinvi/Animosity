@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -6,6 +7,12 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 
 public class Utilities {
+	static final Color back_Green=new Color(54,145,70);
+	static final Color my_Brown=new Color(139, 69, 19);
+	static final Color my_blue=new Color(0,0,1.0f,0.3f);
+	static final Color my_black=new Color (0,0,0,0.3f);
+	static final Color my_green=new Color(110,228,0);
+	static final Color slateGrey=new Color(112,128,144);
 	static Random random=new Random();
 	static 	public int RNGLocX() {
 		int res=random.nextInt(Simulation.WIDTH);

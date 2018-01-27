@@ -1,4 +1,3 @@
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -19,8 +18,8 @@ public class Simulation extends JPanel implements Runnable {
 	//Frame  setup
 	AnimosityFrame frm;
 	Point mousePoint;
-	public final static int WIDTH=1840;
-	public final static int HEIGHT=500;
+	public final static int WIDTH=1800;
+	public final static int HEIGHT=900;
 	//Runtime checks and counters
 	public boolean debugging=false;
 	public boolean running=false;
@@ -58,10 +57,11 @@ public class Simulation extends JPanel implements Runnable {
 	
 	/////////////////////////////////////////////
 	public void initSetup() {
-		for(int i=0;i<20;i++) {
+		for(int i=0;i<30;i++) {
 			generatePlant_1(Utilities.RNGLocX(), Utilities.RNGLocY());
 			generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
-			//generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
+			generateCreaturePoint(Utilities.RNGLocX(), Utilities.RNGLocY());
+			generateCreatureTriangle(Utilities.RNGLocX(), Utilities.RNGLocY());
 		}
 	}
 	public void run() {
@@ -107,7 +107,7 @@ public class Simulation extends JPanel implements Runnable {
 	            }
 	         
 	            //Render. To do so, we need to calculate interpolation for a smooth render.
-	            float interpolation = Math.min(1.0f, (float) ((now - lastUpdateTime) / TIME_BETWEEN_UPDATES) );
+	            interpolation = Math.min(1.0f, (float) ((now - lastUpdateTime) / TIME_BETWEEN_UPDATES) );
 	            drawSim(interpolation);
 	            lastRenderTime = now;
 	         
@@ -144,7 +144,8 @@ public class Simulation extends JPanel implements Runnable {
     }
 	   
 	void updatelists(){
-		for (Creature creature:creaturelist) {
+		for (int i=creaturelist.size()-1;i>=0;i--) {
+			Creature creature=creaturelist.get(i);
 			if (creature instanceof Plant_1 && !plantlist.contains(creature)) {
 				plantlist.add((Plant_1)creature);
 			}
@@ -172,8 +173,8 @@ public class Simulation extends JPanel implements Runnable {
 			int creaturePlantCount=plantlist.size();
 
 			//Send data to charts and console
-			frm.northPanel.updateXYDataset(creaturelist.size());
-			frm.northPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount,creaturePlantCount);
+			frm.graphPanel.updateXYDataset(creaturelist.size());
+			frm.graphPanel.updateXYAreasDataset(creaturePointCount,creatureTriangleCount,creaturePlantCount);
 			delta=0;
 		}
 		tickCount++;;
@@ -181,22 +182,22 @@ public class Simulation extends JPanel implements Runnable {
 	}
 	//CREATURE GENERATOR METHODS
 	Creature generateCreaturePoint(int x,int y){
-		Creature res=new CreaturePoint(this,x,y,4);
+		Creature res=new CreaturePoint(this,x,y,6);
 		if (creaturelist.size()==5000) makeSpace();
 		creaturelist.add(res);
 		return res;
 	}
 	Creature generateCreatureTriangle(int x,int y){
-		Creature res=new CreatureTriangle(this,x,y,4);
+		Creature res=new CreatureTriangle(this,x,y,6);
 		if (creaturelist.size()==5000) makeSpace();
-		creaturelist.add(new CreatureTriangle(this,x,y,4));
+		creaturelist.add(new CreatureTriangle(this,x,y,6));
 		return res;
 	}
 	void generatePlant_1(int x,int y){
 		if (creaturelist.size()==5000) {
 			makeSpace();
 		}
-		creaturelist.add(new Plant_1(this,x,y,5));
+		creaturelist.add(new Plant_1(this,x,y,6));
 	}
 	void makeSpace() {
 		for (int i=0;i<300;i++) {
@@ -205,13 +206,13 @@ public class Simulation extends JPanel implements Runnable {
 	}
 	//ALL PAINTING HAPPENS HERE 	
 	public void paintComponent(Graphics g){
+		this.setBackground(Utilities.back_Green);
 		super.paintComponent(g);
 		Graphics2D g2=(Graphics2D)g;
 		RenderingHints rh=new RenderingHints(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHints(rh);
 		for (int i=0;i<creaturelist.size();i++){
 			creaturelist.get(i).display(g2);
-			g2.setColor(Color.LIGHT_GRAY);
 		}
 	}
 	    

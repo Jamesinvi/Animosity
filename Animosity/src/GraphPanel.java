@@ -24,12 +24,12 @@ public class GraphPanel extends JPanel{
 	JFreeChart areaChart;
 	//Creating Series And Collections
 	XYSeries xyPopulationToT;
-	XYSeries xyForce;
 	XYSeries xySpeciesOne;
 	XYSeries xySpeciesTwo;
+	XYSeries xySpeciesThree;
 	XYSeriesCollection xyDataset;
 	XYSeriesCollection xyAreaDataset;
-	XYSeries xySpeciesThree;
+
 
 	//Constructor
 	public GraphPanel(AnimosityFrame f,FlowLayout flowLayout){
@@ -60,9 +60,7 @@ public class GraphPanel extends JPanel{
 	//CREATE EMPTY XYDataset
 	private XYDataset tempDataset(){
 		xyPopulationToT=new XYSeries("TotalPop");
-		xyForce=new XYSeries("Force");
 		xyDataset=new XYSeriesCollection(xyPopulationToT);
-		xyDataset.addSeries(xyForce);
 		return xyDataset;
 	}
 	//UPDATE METHODS CALLED BY THE SIMULATION TO ADD VALUES TO CHARTS

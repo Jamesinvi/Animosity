@@ -8,7 +8,7 @@ The start button will generate an arbitrary amount of creatures to ensure enough
 
 ### Genetic Algorithm
 
-The initial DNA parameters for the creatures are pseudo-random and control attraction and repulsion forces for food, predators and other creatures. Creature replication simply copies those parameters from the old creature to the new one with a low chance of mutation, for this system to work it must have enough DNA variety at the start of the simulation to avoid creatures dying out because of bad DNA parameters. In this case there is now fitness function and the creatures are passively evolving: the better creatures have a higher change of surviving for a longer period and have a higher reproduction rate. 
+The initial DNA parameters for the creatures are pseudo-random and control attraction and repulsion forces for food, predators and other creatures. Creature replication simply copies those parameters from the old creature to the new one with a low chance of mutation, for this system to work it must have enough DNA variety at the start of the simulation to avoid creatures dying out because of bad DNA parameters. In this case there is no fitness function and the creatures are passively evolving: the better creatures have a higher change of surviving for a longer period and have a higher reproduction rate. 
 
 ### Known Issues
 

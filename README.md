@@ -1,6 +1,6 @@
 # Animosity 
 
-This project is a demonstration of _Flocking behaviours_ and _Genetic algorithms_, creatures are created at the start of the simulation and will seek food. The type of creature determines what it thinks food is: herbivores will eat plants while predators will eat herbivores. All creatures have a maximum lifetime and health value and if any of them reach 0 they will die; the health value will increase if the creature is able to eat but the lifetime value ensures it won't be able to live forever.
+This project is a demonstration of _Steering behaviours_ and _Genetic algorithms_, the goal is to make creatures (represented as dots on the screen) behave differently based on the enviroment. At the start of the simulation an arbitrary amount of creatures is created. The primary and most important steering behaviour is __Food Seeking__, the type of creature determines what it thinks food is: herbivores will seek plants while predators will chase herbivores. All creatures have a maximum lifetime and health value and if any of these values reach 0 they will die; the health value will increase if the creature is able to eat but the lifetime value will continue ticking down ensuring it won't be able to live forever.
 
 All values and parameters for the creatures can be adjusted via the UI but will only be in place for all creatures born __after__ the change is made. The graphs show the total number of creatures alive (including plants and predators) and species-specific data over time.
 
